@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Terrain
+  m_Shader: {fileID: 4800000, guid: db23ab0465e183748bf0d38ad33361ce, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WallTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _BumpScale: 1
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _GlossMapScale: 0
+    - _Glossiness: 0
+    - _GlossyReflections: 1
+    - _Metallic: 0
+    - _Mode: 0
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _RockLevel: 7.57
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _Test: 0
+    - _TexScale: 1
+    - _TopNormalThreshold: 0.331
+    - _UVSec: 0
+    - _ZWrite: 1
+    - _gScale: 20
+    - _noiseThresh: 0.02
+    - _rScale: 20
+    - _tScale: 50
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GrassDark: {r: 0.43845677, g: 0.471042, b: 0.5566038, a: 1}
+    - _GrassLight: {r: 1, g: 1, b: 1, a: 1}
+    - _Ground: {r: 0.3301887, g: 0.1100629, b: 0, a: 1}
+    - _Ground2: {r: 0.5377358, g: 0.12648676, b: 0, a: 1}
+    - _Rock: {r: 0.1764706, g: 0.1764706, b: 0.1764706, a: 1}
+    - _Rock2: {r: 0.11320752, g: 0.08218215, b: 0.06461372, a: 1}
+    - _RockDark: {r: 0.4245283, g: 0.24971177, b: 0.15419187, a: 1}
+    - _RockInnerDark: {r: 1, g: 1, b: 1, a: 1}
+    - _RockInnerDeep: {r: 0.6039216, g: 0, b: 0.41960788, a: 1}
+    - _RockInnerLight: {r: 1, g: 1, b: 1, a: 1}
+    - _RockInnerShallow: {r: 0.6037736, g: 0, b: 0.41998205, a: 1}
+    - _RockLight: {r: 0.6509434, g: 0.49626204, b: 0.40837488, a: 1}
+    - _Top: {r: 0.08627451, g: 0.31764707, b: 0.050980397, a: 1}
+    - _Top2: {r: 0.5388204, g: 0.6132076, b: 0, a: 1}
+    - _TopDark: {r: 0.18943575, g: 0.26724333, b: 0.31132078, a: 1}
+    - _TopLight: {r: 0.27153793, g: 0.4346326, b: 0.509434, a: 1}
+  m_BuildTextureStacks: []
