@@ -81,7 +81,7 @@ Material:
     - _SrcBlend: 1
     - _Test: 0
     - _TexScale: 1
-    - _TopNormalThreshold: 0.331
+    - _TopNormalThreshold: 0.73
     - _UVSec: 0
     - _ZWrite: 1
     - _gScale: 20
@@ -93,7 +93,7 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GrassDark: {r: 0.43845677, g: 0.471042, b: 0.5566038, a: 1}
     - _GrassLight: {r: 1, g: 1, b: 1, a: 1}
-    - _Ground: {r: 0.3301887, g: 0.1100629, b: 0, a: 1}
+    - _Ground: {r: 0.1513439, g: 0.1667233, b: 0.1792453, a: 1}
     - _Ground2: {r: 0.5377358, g: 0.12648676, b: 0, a: 1}
     - _Rock: {r: 0.1764706, g: 0.1764706, b: 0.1764706, a: 1}
     - _Rock2: {r: 0.11320752, g: 0.08218215, b: 0.06461372, a: 1}
@@ -103,8 +103,8 @@ Material:
     - _RockInnerLight: {r: 1, g: 1, b: 1, a: 1}
     - _RockInnerShallow: {r: 0.6037736, g: 0, b: 0.41998205, a: 1}
     - _RockLight: {r: 0.6509434, g: 0.49626204, b: 0.40837488, a: 1}
-    - _Top: {r: 0.08627451, g: 0.31764707, b: 0.050980397, a: 1}
-    - _Top2: {r: 0.5388204, g: 0.6132076, b: 0, a: 1}
+    - _Top: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}
+    - _Top2: {r: 1, g: 1, b: 1, a: 1}
     - _TopDark: {r: 0.18943575, g: 0.26724333, b: 0.31132078, a: 1}
     - _TopLight: {r: 0.27153793, g: 0.4346326, b: 0.509434, a: 1}
   m_BuildTextureStacks: []

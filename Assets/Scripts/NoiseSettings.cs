@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using Unity.Mathematics;
 
 [Serializable]
 public class NoiseSettings
@@ -10,5 +11,5 @@ public class NoiseSettings
     public float scale;
     public float persistence;
     public float lacunarity;
-
+    public int3 noiseOffset;
 }

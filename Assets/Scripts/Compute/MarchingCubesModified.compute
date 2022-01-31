@@ -13,18 +13,18 @@ struct Triangle
 
     float3 normal1;
     float3 normal2;
-    float3 normal3; 
+    float3 normal3;
 };
 struct Vert
 {
-    float4 vert;  
-    float3 normal;  
+    float3 vert;
+    float3 normal;
 };
 
 
 StructuredBuffer<float> densityGrid;
-AppendStructuredBuffer<Triangle> triangles;
-//RWStructuredBuffer<Vert> verts;
+//AppendStructuredBuffer<Triangle> triangles;
+AppendStructuredBuffer<Vert> verts;
 int chunkWidth;
 int chunkHeight;
 int chunkDepth;
@@ -50,7 +50,7 @@ float3 CubePointLerp(float4 a, float4 b)
     float factor = (isoLevel - a.w) / (b.w - a.w);
     float3 _a = float3(a.x, a.y, a.z);
     float3 _b = float3(b.x, b.y, b.z);
-    return lerp(_a, _b, factor); 
+    return lerp(_a, _b, factor);
 }
 
 float3 getNormalFromDensityGrid(int3 coord)
@@ -68,16 +68,16 @@ float3 getNormalFromDensityGrid(int3 coord)
 float3 getNormalOnEdge(float4 a, float4 b)
 {
     float factor = (isoLevel - a.w) / (b.w - a.w);
-    float3 na = getNormalFromDensityGrid((float3)a);
-    float3 nb = getNormalFromDensityGrid((float3)b);
+    float3 na = getNormalFromDensityGrid((float3) a);
+    float3 nb = getNormalFromDensityGrid((float3) b);
 
-    float3 normal = normalize(na + factor * (nb-na));
+    float3 normal = normalize(na + factor * (nb - na));
     return normal;
 }
 
 
-[numthreads(128,1,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+[numthreads(128, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
 {
      
 
@@ -112,14 +112,22 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     cubePoints[7] = float4(x, y + 1, z + 1, grid(x, y + 1, z + 1));
                      
     int cubeIndex = 0;
-    if (cubePoints[0].w < isoLevel) cubeIndex |= 1;
-    if (cubePoints[1].w < isoLevel) cubeIndex |= 2;
-    if (cubePoints[2].w < isoLevel) cubeIndex |= 4;
-    if (cubePoints[3].w < isoLevel) cubeIndex |= 8;
-    if (cubePoints[4].w < isoLevel) cubeIndex |= 16;
-    if (cubePoints[5].w < isoLevel) cubeIndex |= 32;
-    if (cubePoints[6].w < isoLevel) cubeIndex |= 64;
-    if (cubePoints[7].w < isoLevel) cubeIndex |= 128;
+    if (cubePoints[0].w < isoLevel)
+        cubeIndex |= 1;
+    if (cubePoints[1].w < isoLevel)
+        cubeIndex |= 2;
+    if (cubePoints[2].w < isoLevel)
+        cubeIndex |= 4;
+    if (cubePoints[3].w < isoLevel)
+        cubeIndex |= 8;
+    if (cubePoints[4].w < isoLevel)
+        cubeIndex |= 16;
+    if (cubePoints[5].w < isoLevel)
+        cubeIndex |= 32;
+    if (cubePoints[6].w < isoLevel)
+        cubeIndex |= 64;
+    if (cubePoints[7].w < isoLevel)
+        cubeIndex |= 128;
      
     int idx = id.x + id.y * chunkWidth + id.z * chunkWidth * chunkHeight;
     for (int i = 0; triangulation[cubeIndex][i] != -1; i += 3)
@@ -147,27 +155,31 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         float3 normalOnPtOnEdge2 = getNormalOnEdge(cubePoints[edge2VertexA], cubePoints[edge2VertexB]);
         float3 normalOnPtOnEdge3 = getNormalOnEdge(cubePoints[edge3VertexA], cubePoints[edge3VertexB]);
          
-        Triangle t;
-        //Vert v1, v2, v3;
-        //v1.vert = float4(vertexOnEdge1, 1);
-        //v2.vert = float4(vertexOnEdge2,1);
-        //v3.vert = float4(vertexOnEdge3,1);
-        //v1.normal = normalOnPtOnEdge1;
-        //v2.normal = normalOnPtOnEdge2;
-        //v3.normal = normalOnPtOnEdge3;
+        //Triangle t;
+        Vert v1, v2, v3;
+        v1.vert = vertexOnEdge1;
+        v2.vert = vertexOnEdge2;
+        v3.vert = vertexOnEdge3;
+        v1.normal = normalOnPtOnEdge1;
+        v2.normal = normalOnPtOnEdge2;
+        v3.normal = normalOnPtOnEdge3;
+        
+        verts.Append(v1);
+        verts.Append(v2);
+        verts.Append(v3);
         
         //verts[idx * 15 + (3 * i + 0)] = v1;
         //verts[idx * 15 + (3 * i + 1)] = v2;
         //verts[idx * 15 + (3 * i + 2)] = v3;
 
-        t.vert1 = vertexOnEdge1;
-        t.vert2 = vertexOnEdge2;
-        t.vert3 = vertexOnEdge3;
-        t.normal1 = normalOnPtOnEdge1;
-        t.normal2 = normalOnPtOnEdge2;
-        t.normal3 = normalOnPtOnEdge3; 
+        //t.vert1 = vertexOnEdge1;
+        //t.vert2 = vertexOnEdge2;
+        //t.vert3 = vertexOnEdge3;
+        //t.normal1 = normalOnPtOnEdge1;
+        //t.normal2 = normalOnPtOnEdge2;
+        //t.normal3 = normalOnPtOnEdge3;
 
-        triangles.Append(t); 
+        //triangles.Append(t);
 
     }
      

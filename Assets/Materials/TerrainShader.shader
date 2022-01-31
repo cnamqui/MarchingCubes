@@ -77,9 +77,7 @@ Shader "Custom/Terrain" {
 		}
 		void surf(Input IN, inout SurfaceOutputStandard o) {
 
-			float3 scaledWorldPos = IN.worldPos; 
-			 
-
+			float3 scaledWorldPos = IN.worldPos;  
 			
 			float4 noise = triplanarOffset(IN.worldPos, IN.worldNormal, 256 * _tScale, _MainTex, 0);
 			float4 noise2 = triplanarOffset(IN.worldPos, IN.worldNormal, 256 * _gScale, _MainTex, 0);

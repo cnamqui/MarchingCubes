@@ -81,41 +81,42 @@ void CSMain(int3 id : SV_DispatchThreadID)
     float3 worldPos = float3(idx + _gridOffset);
     float2 noisePos2 = float2(noisePos.x, noisePos.z);
     float3 noisePos2b = float3(noisePos.x, 0, noisePos.z);
-
-    //DensityGrid[gidx] = (noise3d(pos)); 
-    //if (idx.y == 1)
-    //{
-    //    HeightMap[hmidx] = (noise2d(pos2));
-    //}
+     
     float noiseAtPt = noise3d(noisePos);
     float4 s; 
     
-    float heightAtPoint = noise2d(noisePos2) * _maxOverworldHeight;
-    float totalHeightAtPt = _overworldStartAt + heightAtPoint;
+    //float heightAtPoint = noise2d(noisePos2) * _maxOverworldHeight;
+    //float totalHeightAtPt = _overworldStartAt + heightAtPoint;
     
-    float baseHeightAtPt = noise2d(noisePos2) * 10.0f;
-    float baseOverWorldTotalHeightAtPt = _overworldStartAt + baseHeightAtPt;
-    if (worldPos.y > (int) totalHeightAtPt - 1)
-    {
-        float pt = worldPos.y - totalHeightAtPt;
-        if (noiseAtPt > _isoLevel)
-        {
-            pt = noiseAtPt;
-        }
+    //float baseHeightAtPt = noise2d(noisePos2) * 10.0f;
+    //float baseOverWorldTotalHeightAtPt = _overworldStartAt + baseHeightAtPt;
+    if (worldPos.y > (int) _overworldStartAt)
+    { 
 
-        noiseAtPt = pt;
+        noiseAtPt *= 1 - (_maxOverworldHeight - (worldPos.y - _overworldStartAt)) / _maxOverworldHeight;
     }
-    else if (abs(worldPos.y - baseOverWorldTotalHeightAtPt) <=1 )
-    {
-        //noiseAtPt = min(noiseAtPt , _isoLevel-0.001f);
-        float pt = worldPos.y - baseOverWorldTotalHeightAtPt;
-        if (noiseAtPt < _isoLevel)
-        {
-            pt = noiseAtPt;
-        }
 
-        noiseAtPt = pt;
-    }
+    //if (worldPos.y > (int) totalHeightAtPt - 1)
+    //{
+    //    float pt = worldPos.y - totalHeightAtPt;
+    //    if (noiseAtPt > _isoLevel)
+    //    {
+    //        pt = noiseAtPt;
+    //    }
+
+    //    noiseAtPt = pt;
+    //}
+    //else if (abs(worldPos.y - baseOverWorldTotalHeightAtPt) <=1 )
+    //{
+    //    //noiseAtPt = min(noiseAtPt , _isoLevel-0.001f);
+    //    float pt = worldPos.y - baseOverWorldTotalHeightAtPt;
+    //    if (noiseAtPt < _isoLevel)
+    //    {
+    //        pt = noiseAtPt;
+    //    }
+
+    //    noiseAtPt = pt;
+    //}
      
     DensityGrid[gidx] = noiseAtPt;
      

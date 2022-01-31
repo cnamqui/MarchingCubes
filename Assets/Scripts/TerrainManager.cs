@@ -30,6 +30,8 @@ public class TerrainManager : MonoBehaviour
 
     [Header("Misc ")] 
     [SerializeField] ComputeShader noiseTexCompute;
+    [SerializeField] uint throttle = 3;
+    [SerializeField] uint throttle2 = 3;
 
 
     Dictionary<Vector3Int, float[,,]> densityGrids = new Dictionary<Vector3Int, float[,,]>();
@@ -41,6 +43,7 @@ public class TerrainManager : MonoBehaviour
      
     Queue<IEnumerator> marchingCubesGPUJobs = new Queue<IEnumerator>();
     Queue<IEnumerator> drawSequenceQueue = new Queue<IEnumerator>();
+    Queue<UJQueueItem> marchingCubesUnityJobs = new Queue<UJQueueItem>();
 
     private void Awake()
     {   
@@ -64,7 +67,8 @@ public class TerrainManager : MonoBehaviour
         }
         GenerateNoiseTex(); 
         StartCoroutine(processMcgJobs());
-        StartCoroutine(processDrawSequenceQueue()); 
+        StartCoroutine(processDrawSequenceQueue());
+        StartCoroutine(processUJQueue());
     }
      
 
@@ -72,11 +76,13 @@ public class TerrainManager : MonoBehaviour
     {
         while (true)
         {
-            while (marchingCubesGPUJobs.Count > 0)
+            var ct = 0;
+            while (marchingCubesGPUJobs.Count > 0 && ct <throttle)
             {
                 
                 var mcgJob = marchingCubesGPUJobs.Dequeue(); 
-                yield return StartCoroutine(mcgJob);
+                /*yield return*/ StartCoroutine(mcgJob);
+                ct++;
                 
             }
             yield return null;
@@ -94,11 +100,14 @@ public class TerrainManager : MonoBehaviour
     {
         while (true)
         {
-            while (drawSequenceQueue.Count > 0)
+            var ct = 0;
+            while (drawSequenceQueue.Count > 0 && ct < throttle)
             {
 
-                var drawJob = drawSequenceQueue.Dequeue();  
-                yield return StartCoroutine(drawJob); ;
+                var drawJob = drawSequenceQueue.Dequeue();
+                /*yield return */
+                StartCoroutine(drawJob);
+                ct++;
 
             }
             yield return null;
@@ -111,6 +120,38 @@ public class TerrainManager : MonoBehaviour
             this.drawSequenceQueue.Enqueue(dj);
         }
     }
+
+    IEnumerator processUJQueue()
+    {
+        while (true)
+        {
+            var ct = 0;
+            while (marchingCubesUnityJobs.Count > 0 && ct < throttle)
+            {
+
+                var ujqi = marchingCubesUnityJobs.Dequeue();
+                /*yield return */
+                StartCoroutine(ujqi.coroutine);
+                ct++;
+
+            }
+            yield return null;
+        }
+    }
+    public void QueueUJQI(UJQueueItem ujqi)
+    {
+        lock (this.marchingCubesUnityJobs)
+        {
+            if (marchingCubesUnityJobs.Contains(ujqi)){
+                return;
+            }
+            this.marchingCubesUnityJobs.Enqueue(ujqi);
+        }
+    }
+
+
+
+
 
     // Update is called once per frame
     void Update()

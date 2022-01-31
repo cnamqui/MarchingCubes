@@ -48,6 +48,7 @@ public class ChunkContainer : MonoBehaviour
         {
             //QueueMarchCubes();
             MarchCubes_GPU();
+            //QueueMarchCubesUJ(); 
         } 
         
     }
@@ -80,7 +81,7 @@ public class ChunkContainer : MonoBehaviour
         }
         mesh.Clear();  
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; //increase max vertices per mesh
-        mesh.name = "ProceduralMesh";
+        mesh.name = $"ProceduralMesh_{chunkData.chunkCoord.x}_{chunkData.chunkCoord.y}_{chunkData.chunkCoord.z}";
     }
     
     void BuildMesh()
@@ -111,12 +112,12 @@ public class ChunkContainer : MonoBehaviour
             mr.sharedMaterial.SetTexture("_MainTex", this.texture);
         }
 
-        mf.mesh = mesh;
+        mf.sharedMesh = mesh;
         mc.cookingOptions = MeshColliderCookingOptions.WeldColocatedVertices;
         mc.sharedMesh = mesh;
         // force refresh
-        mc.enabled = false;
-        mc.enabled = true;
+        //mc.enabled = false;
+        //mc.enabled = true;
         //mr.enabled = false;
         mr.enabled = true;
         //mr.material = defaultMaterial;
@@ -279,7 +280,7 @@ public class ChunkContainer : MonoBehaviour
         marchingCubesCompute.SetInt("chunkDepth", chunkData.chunkDepth);
         marchingCubesCompute.SetFloat("isoLevel", TerrainManager.instance.isoLevel);
 
-        int threadGroupsX = Mathf.CeilToInt((chunkData.chunkWidth + 1) * (chunkData.chunkHeight + 1) * (chunkData.chunkDepth + 1) / 1024f);
+        int threadGroupsX = Mathf.CeilToInt((chunkData.chunkWidth + 1) * (chunkData.chunkHeight + 1) * (chunkData.chunkDepth + 1) / 128f);
         //int threadGroupsY = Mathf.CeilToInt((chunkData.chunkHeight + 1)/ 8f);
         //int threadGroupsZ = Mathf.CeilToInt((chunkData.chunkDepth + 1)/ 8f);
         marchingCubesCompute.Dispatch(0, threadGroupsX, 1, 1);
@@ -293,7 +294,8 @@ public class ChunkContainer : MonoBehaviour
         //AsyncGPUReadback.Request(vertBuffer, request => OnReceiveVerts(request, dgridBuffer, vertBuffer, Time.frameCount));
 
         AsyncGPUReadback.Request(triCountBuffer, request => OnTriCountReceived(request, triangleBuffer,triCountBuffer, Time.frameCount ));
-         
+          
+
         dgridBuffer.Dispose(); 
         Debug.Log($"Now:{DateTime.Now } frame: {Time.frameCount}");
     }
@@ -326,6 +328,13 @@ public class ChunkContainer : MonoBehaviour
         triangles.ToArray().Take(triCount).ToArray().CopyTo(_triangles,0);
         triangleBuffer.Dispose();
         triangles.Dispose();
+
+
+        //mesh.SetVertexBufferParams(1, new VertexAttributeDescriptor[] {new VertexAttributeDescriptor(VertexAttribute.Position),
+        //    new VertexAttributeDescriptor(VertexAttribute.Normal) });
+        //mesh.SetVertexBufferData(request.GetData<Triangle>(0), 0, 0, 9, 0, MeshUpdateFlags.DontValidateIndices);
+        //mesh.SetIndexBufferData(request.GetData<Triangle>(0), 0, 0, 9, MeshUpdateFlags.DontValidateIndices);
+
         var trianglesRes = _triangles.Aggregate(new MarchComputeDestruct(), (acc, val) =>
         {
             var vertCount = acc.vertices.Count;
@@ -341,8 +350,10 @@ public class ChunkContainer : MonoBehaviour
             return acc;
         });
         TerrainManager.instance.QueueMarchCubeGPUJobForProcessing(OnMarchCubesCoroutine(trianglesRes));
-        //OnMarchCubesGPUDone(trianglesRes);
+        //OnMarchCubesGPUDone(trianglesRes);  
     }
+
+
 
     IEnumerator OnMarchCubesCoroutine(MarchComputeDestruct trianglesRes)
     {
@@ -359,11 +370,26 @@ public class ChunkContainer : MonoBehaviour
             GenerateNewChunkData();
         }
     }
-    /*
+
+
+    void QueueMarchCubesUJ()
+    {
+        TerrainManager.instance.QueueUJQI(new UJQueueItem() { 
+            coord = chunkData.chunkCoord,
+            coroutine = MCUJCoroutine()
+        });
+
+    }
+    IEnumerator MCUJCoroutine()
+    {
+        MarchCubes_UJ();
+        yield return null;
+    }
     void MarchCubes_UJ()
     {
         int chunkSizeInCubes = chunkData.chunkWidth * chunkData.chunkHeight * chunkData.chunkDepth;
         int maxVertices = chunkSizeInCubes * 15;
+        int maxTris = chunkSizeInCubes * 5;
 
         var _t = Tables.triangulation.Cast<int>().ToArray();
         var _e = Tables.edgeVertices.Cast<int>().ToArray();
@@ -372,6 +398,8 @@ public class ChunkContainer : MonoBehaviour
         NativeArray<float> grid = new NativeArray<float>(chunkData.densityGrid, Allocator.TempJob); 
         NativeArray<int> triangulation = new NativeArray<int>(_t, Allocator.TempJob);
         NativeArray<int> edgeVertices = new NativeArray<int>(_e, Allocator.TempJob);
+        NativeArray<uint> triangleIndices = new NativeArray<uint>(maxTris, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+        NativeCounter triCounter = new NativeCounter(Allocator.TempJob);
         var job = new MarchCubesJob()
         {
             vertices = vertices,
@@ -381,39 +409,46 @@ public class ChunkContainer : MonoBehaviour
             width = chunkData.chunkWidth,
             height = chunkData.chunkHeight,
             depth = chunkData.chunkDepth,
-            isoLevel = TerrainManager.instance.isoLevel
+            isoLevel = TerrainManager.instance.isoLevel,
+            triangleCounter = triCounter,
+            triangleIndices = triangleIndices
         };
-        var jobHandle = job.Schedule(chunkSizeInCubes, 1);
+        JobHandle jobHandle = job.Schedule();
 
-        TerrainManager.instance.QueueMarchCubeJobForProcessing(new MarchCubesJobResultHandler(jobHandle, job, OnMarchCubesResults));
+        jobHandle.Complete();
 
-    }*/
-    /*
-    private void OnMarchCubesResults(Vert[] verts)
-    {
-        var trianglesRes = verts.Aggregate(new MarchComputeDestruct(), (acc, val) =>
-        {
-            var vertCount = acc.vertices.Count;
-            if( val.vert.w > 0)
-            { 
-                acc.vertices.Add( val.vert.xyz ); 
-                acc.normals.Add(val.normal ); 
-                acc.triIndices.Add(vertCount); 
-            }
-            return acc;
-        }); 
+        int vertCount = job.triangleCounter.Count * 3;
 
-        Vector3[] vertices = trianglesRes.vertices.ToArray();
-        int[] triangles = trianglesRes.triIndices.ToArray();
-        Vector3[] normals = trianglesRes.normals.ToArray();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.normals = normals;
+        InitMesh();
 
-        OnMarchCubesDone();
+        SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
 
+        mesh.SetVertexBufferParams(vertCount,new VertexAttributeDescriptor[] {new VertexAttributeDescriptor(VertexAttribute.Position),
+            new VertexAttributeDescriptor(VertexAttribute.Normal) });
+        mesh.SetIndexBufferParams(vertCount, IndexFormat.UInt32);
+
+
+        mesh.SetVertexBufferData(job.vertices, 0, 0, vertCount , 0, MeshUpdateFlags.DontValidateIndices);
+        mesh.SetIndexBufferData(job.triangleIndices, 0, 0, vertCount, MeshUpdateFlags.DontValidateIndices);
+
+
+        mesh.subMeshCount = 1;
+        subMesh.indexCount = vertCount;
+        mesh.SetSubMesh(0, subMesh);
+
+
+        job.triangleCounter.Dispose();
+        job.vertices.Dispose();
+        job.grid.Dispose();
+        job.triangulation.Dispose();
+        job.edgeVertices.Dispose();
+        job.triangleIndices.Dispose();
+        BuildMesh();
+        RenderMesh();
+
+        Debug.Log("WOW");
     }
-    */
+    
     private void OnMarchCubesGPUDone(MarchComputeDestruct triangles)
     {
         if (this == null)
@@ -485,15 +520,13 @@ public class ChunkContainer : MonoBehaviour
                !Application.isPlaying) // Callback happened in edit mode afterwards
         {
             return;
-        }
-
+        } 
         var _r = request.GetData<float>(0);
         var dGrid = new float[_r.Length];
         _r.ToArray().CopyTo(dGrid, 0);
         _r.Dispose();
         buffer.Dispose();
         TerrainManager.instance.QueueDrawSequenceJobForProcessing(OnChunkDataReceivedCoroutine(dGrid, cd, cont));
-
         //cd.InitGrid(dGrid);
         //cont.queuedForNoise = false;
 
@@ -558,7 +591,7 @@ struct Triangle
 
 public struct Vert
 {
-    public float4 vert;// float4. w is used to keep track if the vertex is on a generated tri
+    public float3 vert; 
     public float3 normal;
 }
 public class MarchComputeDestruct
@@ -566,5 +599,18 @@ public class MarchComputeDestruct
     public List<Vector3> vertices = new List<Vector3>();
     public List<Vector3> normals = new List<Vector3>();
     public List<int> triIndices = new List<int>();
+}
+public class UJQueueItem {
+    public Vector3Int coord;
+    public IEnumerator coroutine;
+
+    public override bool Equals(object obj)
+    {
+        return obj is UJQueueItem && ((obj as UJQueueItem).coord == coord);
+    }
+    public override int GetHashCode()
+    {
+        return coord.GetHashCode();
+    }
 }
  
