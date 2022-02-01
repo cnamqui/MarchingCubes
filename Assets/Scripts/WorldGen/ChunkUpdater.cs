@@ -11,6 +11,8 @@ public class ChunkUpdater : MonoBehaviour
 {
     
     [SerializeField] ComputeShader marchingCubesCompute;
+    [SerializeField] ComputeShader marchingCubesComputeMeshDirect;
+    [SerializeField] ComputeShader marchingCubesCompute2;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,7 +30,13 @@ public class ChunkUpdater : MonoBehaviour
             }
         }
     }
-    public void GenerateMesh2(ChunkData chunk)
+
+    public void GenerateMesh(ChunkData chunk)
+    {
+        GenerateMeshGPU(chunk);
+    }
+     
+    void GenerateMeshViaMeshApi(ChunkData chunk)
     {
         if (ChunkManager.Instance.voxelStore.TryGetVoxel(chunk.chunkCoord, out VoxelData voxelData))
         {
@@ -36,194 +44,110 @@ public class ChunkUpdater : MonoBehaviour
 
             ChunkSettings settings = ChunkManager.Instance.settings;
 
+            var _builder = new MeshBuilder(chunk, voxelData, ChunkManager.Instance.settings, marchingCubesComputeMeshDirect);
 
-            int maxTriangles = settings.chunkSize * settings.chunkSize * settings.chunkSize * 5;
-            int vertexStride = sizeof(float) * 6;
-            ComputeBuffer vertexBuffer = new ComputeBuffer(maxTriangles * 3, vertexStride, ComputeBufferType.Append);
-            //ComputeBuffer triangleIndexBuffer = new ComputeBuffer(maxTriangles * 3, sizeof(int));
-            ComputeBuffer dgridBuffer = new ComputeBuffer(voxelData.density.Length, sizeof(float));
-            ComputeBuffer vertCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
- 
+            _builder.Build();
 
-            dgridBuffer.SetData(voxelData.density);
-
-            vertexBuffer.SetCounterValue(0); 
-
-            marchingCubesCompute.SetBuffer(0, "verts", vertexBuffer);
-            //marchingCubesCompute.SetBuffer(0, "triangleIndices", triangleIndexBuffer);
-
-            marchingCubesCompute.SetBuffer(0, "densityGrid", dgridBuffer);
-            marchingCubesCompute.SetInt("chunkWidth", settings.chunkSize);
-            marchingCubesCompute.SetInt("chunkHeight", settings.chunkSize);
-            marchingCubesCompute.SetInt("chunkDepth", settings.chunkSize);
-            marchingCubesCompute.SetFloat("isoLevel", settings.isoLevel);
-
-            int threadGroupsX = Mathf.CeilToInt((settings.chunkSize + 1) * (settings.chunkSize + 1) * (settings.chunkSize + 1) / 128f);
-            marchingCubesCompute.Dispatch(0, threadGroupsX, 1, 1);
-
-            ComputeBuffer.CopyCount(vertexBuffer, vertCountBuffer, 0);
-
-            int[] vertCountData = new int[1];
-            vertCountBuffer.GetData(vertCountData);
-            int vertCount = vertCountData[0];
-
-
-            //AsyncGPUReadback.Request(vertCountBuffer, request => OnTriCountReceived(request, triangleBuffer, vertCountBuffer, Time.frameCount));
-
-
-            dgridBuffer.Dispose();
-
-
-            // Update Mesh
-            Mesh mesh = new Mesh();
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
-
-            mesh.SetVertexBufferParams(vertCount, new VertexAttributeDescriptor[] {new VertexAttributeDescriptor(VertexAttribute.Position),
-            new VertexAttributeDescriptor(VertexAttribute.Normal) });
-            mesh.SetIndexBufferParams(vertCount, IndexFormat.UInt32);
-
-            Vertex[] verts = new Vertex[vertCount];
-            int[] triangleIndices = Enumerable.Range(0, vertCount).ToArray();//new int[vertCount];
-            vertexBuffer.GetData(verts, 0, 0, vertCount);
-            //triangleIndexBuffer.GetData(triangleIndices);
-
-
-            var c = verts.Count(v => v.vert.z == 0);
-
-
-            //mesh.vertices = verts.Select(v => v.vert.ToVector3()).ToArray();
-            //mesh.normals = verts.Select(v => v.normal.ToVector3()).ToArray();
-            //mesh.triangles = triangleIndices;
-            mesh.SetVertexBufferData(verts, 0, 0, vertCount, 0, MeshUpdateFlags.DontValidateIndices);
-            mesh.SetIndexBufferData(triangleIndices, 0, 0, vertCount, MeshUpdateFlags.DontValidateIndices);
-
-
-            vertexBuffer.Dispose();
-            //triangleIndexBuffer.Dispose();
-            vertCountBuffer.Dispose();
-
-
-            mesh.subMeshCount = 1;
-            subMesh.indexCount = vertCount;
-            mesh.SetSubMesh(0, subMesh);
-
-
-            mesh.RecalculateBounds();
-            //mesh.RecalculateNormals();
+            var mesh = _builder.Mesh;
+            // Update Mesh   
             //mesh.Optimize();
-
             chunk.meshFilter.sharedMesh = mesh;
-            chunk.meshCollider.sharedMesh = mesh;
-
-            chunk.meshCollider.enabled = true;
+            //chunk.meshCollider.sharedMesh = mesh; 
+            //chunk.meshCollider.enabled = true;
             chunk.meshRenderer.enabled = true;
 
-            chunk.hasChanges = false;
+            chunk.hasChanges = false; 
 
             chunk.hasMesh = true;
+            //_builder.Dispose();
         }
     }
-
-    public void GenerateMesh(ChunkData chunk)
+     
+    void GenerateMeshGPU(ChunkData chunk)
     {
         if (ChunkManager.Instance.voxelStore.TryGetVoxel(chunk.chunkCoord, out VoxelData voxelData))
         {
             // March Cubes 
 
+
+            /*
+                StructuredBuffer<float> densityGrid; 
+                RWStructuredBuffer<Vert> verts;
+                RWStructuredBuffer<uint> triangleIndices;
+                RWStructuredBuffer<uint> triangleCounter; // used only for counting 
+                int chunkWidth;
+                int chunkHeight;
+                int chunkDepth;
+                float isoLevel;
+            */
+
             ChunkSettings settings = ChunkManager.Instance.settings;
 
-            int maxTriangles = settings.chunkSize * settings.chunkSize * settings.chunkSize * 5;
-            int triStride = sizeof(float) * 18;
-            //int vertStride = sizeof(float) * 7;
-            Triangle[] _triangles;
-            ComputeBuffer triangleBuffer = new ComputeBuffer(maxTriangles, triStride, ComputeBufferType.Append);
-            //ComputeBuffer vertBuffer = new ComputeBuffer(maxTriangles * 3, vertStride);
-            ComputeBuffer dgridBuffer = new ComputeBuffer( voxelData.density.Length, sizeof(float));
+            int maxTriangles = settings.chunkSize * settings.chunkSize * settings.chunkSize * 5; 
+            int vertStride = sizeof(float) * 6; 
+            ComputeBuffer vertBuffer = new ComputeBuffer(maxTriangles * 3, vertStride );
+            ComputeBuffer triangleIndexBuffer = new ComputeBuffer(maxTriangles * 3, sizeof(int));
+            ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Counter);
+            ComputeBuffer dgridBuffer = new ComputeBuffer(voxelData.density.Length, sizeof(float));
             ComputeBuffer triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
-            int[] triCountData = new int[1];
+            ComputeBuffer triCountBuffer2 = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
             //triCountBuffer.SetData(triCountData);
             dgridBuffer.SetData(voxelData.density);
 
-            triangleBuffer.SetCounterValue(0);
+            triangleCountBuffer.SetCounterValue(0);
+            //vertBuffer.SetCounterValue(0);
+            //triangleIndexBuffer.SetCounterValue(0);
 
+            marchingCubesCompute2.SetBuffer(0, "verts", vertBuffer);
+            marchingCubesCompute2.SetBuffer(0, "triangleIndices", triangleIndexBuffer);
+            marchingCubesCompute2.SetBuffer(0, "triangleCounter", triangleCountBuffer); 
+            marchingCubesCompute2.SetBuffer(0, "densityGrid", dgridBuffer);
+            marchingCubesCompute2.SetInt("chunkWidth", settings.chunkSize);
+            marchingCubesCompute2.SetInt("chunkHeight", settings.chunkSize);
+            marchingCubesCompute2.SetInt("chunkDepth", settings.chunkSize);
+            marchingCubesCompute2.SetFloat("isoLevel", settings.isoLevel);
 
-            marchingCubesCompute.SetBuffer(0, "triangles", triangleBuffer);
-            //marchingCubesCompute.SetBuffer(0, "verts", vertBuffer);
+            int threadGroupsX = Mathf.CeilToInt((settings.chunkSize + 1) * (settings.chunkSize + 1) * (settings.chunkSize + 1) / 128f);
+            marchingCubesCompute2.Dispatch(0, threadGroupsX, 1, 1);
 
-            marchingCubesCompute.SetBuffer(0, "densityGrid", dgridBuffer);
-            marchingCubesCompute.SetInt("chunkWidth", settings.chunkSize);
-            marchingCubesCompute.SetInt("chunkHeight", settings.chunkSize);
-            marchingCubesCompute.SetInt("chunkDepth", settings.chunkSize);
-            marchingCubesCompute.SetFloat("isoLevel", settings.isoLevel);
-
-            int threadGroupsX = Mathf.CeilToInt((settings.chunkSize + 1) * (settings.chunkSize + 1) * (settings.chunkSize + 1) / 128f); 
-            marchingCubesCompute.Dispatch(0, threadGroupsX, 1, 1);
-
-            ComputeBuffer.CopyCount(triangleBuffer, triCountBuffer, 0);
-            triCountBuffer.GetData(triCountData);
-            _triangles = new Triangle[triCountData[0]];
-            triangleBuffer.GetData(_triangles, 0, 0, triCountData[0]);
-
-
-
-
-
-            dgridBuffer.Dispose();
-
+            int[] vertCountData = new int[1];
+            int[] counterData = new int[1];
+            ComputeBuffer.CopyCount(triangleCountBuffer, triCountBuffer, 0);
+            triCountBuffer.GetData(vertCountData);
+            //ComputeBuffer.CopyCount(triangleCountBuffer, triCountBuffer2, 0);
+            //triCountBuffer2.GetData(counterData);
+            var vertCount = vertCountData[0] * 3;
+             
 
             // Update Mesh
             Mesh mesh = new Mesh();
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
 
-            //mesh.SetVertexBufferParams(vertCount, new VertexAttributeDescriptor[] {new VertexAttributeDescriptor(VertexAttribute.Position),
-            //new VertexAttributeDescriptor(VertexAttribute.Normal) });
-            //mesh.SetIndexBufferParams(vertCount, IndexFormat.UInt32);
+            mesh.SetVertexBufferParams(vertCount, new VertexAttributeDescriptor[] {new VertexAttributeDescriptor(VertexAttribute.Position),
+            new VertexAttributeDescriptor(VertexAttribute.Normal) });
+            mesh.SetIndexBufferParams(vertCount, IndexFormat.UInt32);
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+             
 
-            //Vertex[] verts = new Vertex[vertCount];
-            //int[] triangleIndices = Enumerable.Range(0, vertCount).ToArray();//new int[vertCount];
-            //vertexBuffer.GetData(verts, 0, 0, vertCount);
-            //triangleIndexBuffer.GetData(triangleIndices);
-
-
-            var trianglesRes = _triangles.Aggregate(new MarchComputeDestruct(), (acc, val) =>
-            {
-                var vertCount = acc.vertices.Count;
-                acc.vertices.Add(val.vert1);
-                acc.vertices.Add(val.vert2);
-                acc.vertices.Add(val.vert3);
-                acc.normals.Add(val.normal1);
-                acc.normals.Add(val.normal2);
-                acc.normals.Add(val.normal3);
-                acc.triIndices.Add(vertCount + 0);
-                acc.triIndices.Add(vertCount + 1);
-                acc.triIndices.Add(vertCount + 2);
-                return acc;
-            });
-
-
-
-
-            mesh.vertices = trianglesRes.vertices.ToArray();
-            mesh.triangles = trianglesRes.triIndices.ToArray();
-            mesh.normals = trianglesRes.normals.ToArray();
-            //mesh.SetVertexBufferData(verts, 0, 0, 3, 0, MeshUpdateFlags.DontValidateIndices);
-            //mesh.SetIndexBufferData(triangleIndices, 0, 0, 3, MeshUpdateFlags.DontValidateIndices); 
-
-
+            var verts = new Vert[vertCount];
+            vertBuffer.GetData(verts, 0, 0, vertCount);
+            var triangleIndices = new int[vertCount];
+            triangleIndexBuffer.GetData(triangleIndices,0,0,vertCount);
+            mesh.SetVertexBufferData(verts, 0, 0,vertCount, 0, MeshUpdateFlags.DontValidateIndices);
+            mesh.SetIndexBufferData(triangleIndices, 0, 0,vertCount,  MeshUpdateFlags.DontValidateIndices);
+             
             //vertexBuffer.Dispose();
             //triangleIndexBuffer.Dispose(); 
             //vertCountBuffer.Dispose();
 
 
             mesh.subMeshCount = 1;
-            subMesh.indexCount = triCountData[0] *3;
+            subMesh.indexCount = vertCount;
             mesh.SetSubMesh(0, subMesh);
 
-            triangleBuffer.Dispose();
             triCountBuffer.Dispose();
-
+            //var ext = new Vector3(settings.chunkSize, settings.chunkSize, settings.chunkSize);
+            // mesh.bounds = new Bounds(Vector3.zero, ext);
 
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
@@ -238,6 +162,13 @@ public class ChunkUpdater : MonoBehaviour
             chunk.hasChanges = false;
 
             chunk.hasMesh = true;
+
+            dgridBuffer.Dispose();
+
+            vertBuffer.Dispose();
+            triangleIndexBuffer.Dispose();
+            triangleCountBuffer.Dispose();
+            dgridBuffer.Dispose();
         }
     }
 }

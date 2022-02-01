@@ -183,6 +183,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -229,8 +230,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 206641947}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 10, z: 0}
+  m_LocalPosition: {x: 0, y: 48, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -285,7 +287,10 @@ MonoBehaviour:
     NearClipPlane: 0.1
     FarClipPlane: 5000
     Dutch: 0
+    ModeOverride: 0
     LensShift: {x: 0, y: 0}
+    GateFit: 2
+    m_SensorSize: {x: 1.8425076, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -304,6 +309,7 @@ Transform:
   m_LocalRotation: {x: 0.079849735, y: -0.6578684, z: 0.07045734, w: 0.74556625}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 714364918}
   m_Father: {fileID: 616752368}
@@ -354,7 +360,10 @@ MonoBehaviour:
     NearClipPlane: 0.1
     FarClipPlane: 5000
     Dutch: 0
+    ModeOverride: 0
     LensShift: {x: 0, y: 0}
+    GateFit: 2
+    m_SensorSize: {x: 1.8425076, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -436,8 +445,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 616752366}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 16.867756, y: 15, z: -2.1163294}
+  m_LocalPosition: {x: 16.867756, y: 53, z: -2.1163294}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1303260818}
   - {fileID: 1390422008}
@@ -489,6 +499,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 591593022}
   m_RootOrder: 0
@@ -615,6 +626,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1303260818}
   m_RootOrder: 0
@@ -766,7 +778,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 0
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -790,8 +802,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1254133274}
   m_LocalRotation: {x: 0.09336225, y: -0.6564819, z: 0.082380444, w: 0.74399495}
-  m_LocalPosition: {x: 16.867756, y: 15, z: -2.1163294}
+  m_LocalPosition: {x: 16.867756, y: 53, z: -2.1163294}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -919,6 +932,7 @@ Transform:
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -973,7 +987,10 @@ MonoBehaviour:
     NearClipPlane: 0.1
     FarClipPlane: 5000
     Dutch: 0
+    ModeOverride: 0
     LensShift: {x: 0, y: 0}
+    GateFit: 2
+    m_SensorSize: {x: 1.8425076, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -992,6 +1009,7 @@ Transform:
   m_LocalRotation: {x: 0.106879696, y: -0.65487486, z: 0.09430788, w: 0.7421736}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1152384127}
   m_Father: {fileID: 616752368}
@@ -1095,6 +1113,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1390422008}
   m_RootOrder: 0
@@ -1242,7 +1261,10 @@ MonoBehaviour:
     NearClipPlane: 0.1
     FarClipPlane: 5000
     Dutch: 0
+    ModeOverride: 0
     LensShift: {x: 0, y: 0}
+    GateFit: 2
+    m_SensorSize: {x: 1.8425076, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1261,6 +1283,7 @@ Transform:
   m_LocalRotation: {x: 0.09336226, y: -0.6564819, z: 0.08238044, w: 0.74399495}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1378701221}
   m_Father: {fileID: 616752368}
@@ -1298,6 +1321,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
@@ -1319,7 +1343,7 @@ MonoBehaviour:
     densitySettings:
       octaves: 8
       scale: 0.75
-      persistence: 0.3
+      persistence: 0.52
       lacunarity: 2
       noiseOffset:
         x: 0
@@ -1327,7 +1351,7 @@ MonoBehaviour:
         z: 0
     heightMapSettings:
       octaves: 8
-      scale: 0.153
+      scale: 0.63153
       persistence: 0.5
       lacunarity: 2
       noiseOffset:
@@ -1337,10 +1361,10 @@ MonoBehaviour:
     overlayHeightmapOverDensity: 0
     isoLevel: 0.6
     chunkSize: 96
-    seed: -775066
-    viewRadius: 1
-    maxOverworldHeight: 200.23
-    underworldDrawClamp: 2
+    seed: 0
+    viewRadius: 8
+    maxOverworldHeight: 180.23
+    underworldDrawClamp: 1
     overworldStartAt: 0
   lockProcGen: 0
 --- !u!114 &1669751381
@@ -1381,7 +1405,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac35eebd794acdd4c8be7f5a7bd05460, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  marchingCubesCompute: {fileID: 7200000, guid: 722038414731b594d9dabf9b80fe0e48, type: 3}
+  marchingCubesCompute: {fileID: 7200000, guid: 2f47be8cb6dbe894a95794bd2f6ec9fd, type: 3}
+  marchingCubesComputeMeshDirect: {fileID: 7200000, guid: 722038414731b594d9dabf9b80fe0e48, type: 3}
+  marchingCubesCompute2: {fileID: 7200000, guid: ce00f8be83b09ce448816ea7454f39c5, type: 3}
 --- !u!114 &1669751384
 MonoBehaviour:
   m_ObjectHideFlags: 0

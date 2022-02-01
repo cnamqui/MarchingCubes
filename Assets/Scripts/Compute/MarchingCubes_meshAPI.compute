@@ -1,0 +1,188 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+#pragma kernel ClearUnused
+#include "./Tables.compute"
+#define SIZEOF_UINT 4
+#define SIZEOF_FLOAT3 12
+
+
+ 
+struct Vert
+{
+    float3 vert;
+    float3 normal;
+};
+
+
+StructuredBuffer<float> densityGrid;
+RWByteAddressBuffer triangleIndices;
+RWByteAddressBuffer vertices;
+RWStructuredBuffer<uint> triangleCounter; // used only for counting 
+int chunkWidth;
+int chunkHeight;
+int chunkDepth;
+float isoLevel;
+int maxTriangles;
+
+
+float grid(int x, int y, int z)
+{
+    if (x < 0 || y < 0 || z < 0 || x > chunkWidth || y > chunkHeight || z > chunkDepth)
+    {
+        return 0;
+    }
+    int idx = x + (y * (chunkWidth + 1)) + (z * (chunkWidth + 1) * (chunkHeight + 1));
+    return densityGrid[idx];
+
+}
+float grid(float3 coord)
+{
+    return grid(coord.x, coord.y, coord.z);
+}
+float3 CubePointLerp(float4 a, float4 b)
+{
+    float factor = (isoLevel - a.w) / (b.w - a.w);
+    float3 _a = float3(a.x, a.y, a.z);
+    float3 _b = float3(b.x, b.y, b.z);
+    return lerp(_a, _b, factor);
+}
+
+float3 getNormalFromDensityGrid(int3 coord)
+{
+    int3 offsetX = int3(1, 0, 0);
+    int3 offsetY = int3(0, 1, 0);
+    int3 offsetZ = int3(0, 0, 1);
+
+    float dx = grid(coord + offsetX) - grid(coord - offsetX);
+    float dy = grid(coord + offsetY) - grid(coord - offsetY);
+    float dz = grid(coord + offsetZ) - grid(coord - offsetZ);
+
+    return normalize(float3(dx, dy, dz));
+}
+float3 getNormalOnEdge(float4 a, float4 b)
+{
+    float factor = (isoLevel - a.w) / (b.w - a.w);
+    float3 na = getNormalFromDensityGrid((float3) a);
+    float3 nb = getNormalFromDensityGrid((float3) b);
+
+    float3 normal = normalize(na + factor * (nb - na));
+    return normal;
+} 
+void writeVertexAndNormal(uint offset, float3 pos, float3 normal)
+{
+    uint addr_p = offset * SIZEOF_FLOAT3 * 2;
+    uint addr_n = addr_p + SIZEOF_FLOAT3;
+    vertices.Store3(addr_p, asuint(pos));
+    vertices.Store3(addr_n, asuint(normal));
+}
+ 
+void writeIndices(uint offset, uint3 indices)
+{
+    triangleIndices.Store3(offset * SIZEOF_UINT, indices);
+}
+
+[numthreads(128, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+     
+
+    int z = id.x / (chunkWidth * chunkHeight);
+    int remFromZ = id.x - (z * chunkWidth * chunkHeight);
+    int y = remFromZ / chunkWidth;
+    int x = remFromZ % chunkWidth;
+     
+    
+    if (x >= chunkWidth || y >= chunkHeight || z >= chunkDepth)
+    {
+        return;
+    }
+     
+    float4 cubePoints[8];
+    //cubePoints[0] = new Vector4(x, y, z + 1, grid[x, y, z + 1]);
+    //cubePoints[1] = new Vector4(x + 1, y, z + 1, grid[x + 1, y, z + 1]);
+    //cubePoints[2] = new Vector4(x + 1, y, z, grid[x + 1, y, z]);
+    //cubePoints[3] = new Vector4(x, y, z, grid[x, y, z]);
+    //cubePoints[4] = new Vector4(x, y + 1, z + 1, grid[x, y + 1, z + 1]);
+    //cubePoints[5] = new Vector4(x + 1, y + 1, z + 1, grid[x + 1, y + 1, z + 1]);
+    //cubePoints[6] = new Vector4(x + 1, y + 1, z, grid[x + 1, y + 1, z]);
+    //cubePoints[7] = new Vector4(x, y + 1, z, grid[x, y + 1, z]);
+
+    cubePoints[0] = float4(x, y, z, grid(x, y, z));
+    cubePoints[1] = float4(x + 1, y, z, grid(x + 1, y, z));
+    cubePoints[2] = float4(x + 1, y, z + 1, grid(x + 1, y, z + 1));
+    cubePoints[3] = float4(x, y, z + 1, grid(x, y, z + 1));
+    cubePoints[4] = float4(x, y + 1, z, grid(x, y + 1, z));
+    cubePoints[5] = float4(x + 1, y + 1, z, grid(x + 1, y + 1, z));
+    cubePoints[6] = float4(x + 1, y + 1, z + 1, grid(x + 1, y + 1, z + 1));
+    cubePoints[7] = float4(x, y + 1, z + 1, grid(x, y + 1, z + 1));
+                     
+    int cubeIndex = 0;
+    if (cubePoints[0].w < isoLevel)
+        cubeIndex |= 1;
+    if (cubePoints[1].w < isoLevel)
+        cubeIndex |= 2;
+    if (cubePoints[2].w < isoLevel)
+        cubeIndex |= 4;
+    if (cubePoints[3].w < isoLevel)
+        cubeIndex |= 8;
+    if (cubePoints[4].w < isoLevel)
+        cubeIndex |= 16;
+    if (cubePoints[5].w < isoLevel)
+        cubeIndex |= 32;
+    if (cubePoints[6].w < isoLevel)
+        cubeIndex |= 64;
+    if (cubePoints[7].w < isoLevel)
+        cubeIndex |= 128;
+     
+    int idx = id.x + id.y * chunkWidth + id.z * chunkWidth * chunkHeight;
+    for (int i = 0; triangulation[cubeIndex][i] != -1; i += 3)
+    {
+        int edge1Index = triangulation[cubeIndex][i];
+        int edge2Index = triangulation[cubeIndex][i + 1];
+        int edge3Index = triangulation[cubeIndex][i + 2];
+                        
+        // indices of the vertex in  cubePoints[]
+        // since they're ordered the same as the diagram
+        int edge1VertexA = edgeVertices[edge1Index][0];
+        int edge1VertexB = edgeVertices[edge1Index][1];
+        int edge2VertexA = edgeVertices[edge2Index][0];
+        int edge2VertexB = edgeVertices[edge2Index][1];
+        int edge3VertexA = edgeVertices[edge3Index][0];
+        int edge3VertexB = edgeVertices[edge3Index][1];
+
+        // interpolate between the vertices based on the distance between their noise values
+        
+        float3 vertexOnEdge1 = CubePointLerp(cubePoints[edge1VertexA], cubePoints[edge1VertexB]);
+        float3 vertexOnEdge2 = CubePointLerp(cubePoints[edge2VertexA], cubePoints[edge2VertexB]);
+        float3 vertexOnEdge3 = CubePointLerp(cubePoints[edge3VertexA], cubePoints[edge3VertexB]);
+
+        float3 normalOnPtOnEdge1 = getNormalOnEdge(cubePoints[edge1VertexA], cubePoints[edge1VertexB]);
+        float3 normalOnPtOnEdge2 = getNormalOnEdge(cubePoints[edge2VertexA], cubePoints[edge2VertexB]);
+        float3 normalOnPtOnEdge3 = getNormalOnEdge(cubePoints[edge3VertexA], cubePoints[edge3VertexB]);
+          
+        uint count = triangleCounter.IncrementCounter();
+         
+        uint vidx = count * 3;
+        writeVertexAndNormal(vidx + 0, vertexOnEdge1, normalOnPtOnEdge1);
+        writeVertexAndNormal(vidx + 1, vertexOnEdge2, normalOnPtOnEdge2);
+        writeVertexAndNormal(vidx + 2, vertexOnEdge3, normalOnPtOnEdge3);
+        writeIndices(vidx, uint3(vidx, vidx + 1, vidx + 2));
+    } 
+}
+
+
+[numthreads(64, 1, 1)]
+void ClearUnused(uint id : SV_DispatchThreadID)
+{
+    while (true)
+    {
+        uint count = triangleCounter.IncrementCounter();
+        if (count >= maxTriangles)
+            break;
+        uint vidx = count * 3;
+        writeVertexAndNormal(vidx + 0, 0, 0);
+        writeVertexAndNormal(vidx + 1, 0, 0);
+        writeVertexAndNormal(vidx + 2, 0, 0);
+        writeIndices(vidx, uint3(1, 1, 1));
+    }
+}

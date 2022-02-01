@@ -19,7 +19,7 @@ public class ChunkFactory : MonoBehaviour
     void Start()
     {
         queue = new Queue<int3>();
-        GenerateNoiseTex();
+        //GenerateNoiseTex();
     }
 
     // Update is called once per frame
@@ -59,6 +59,10 @@ public class ChunkFactory : MonoBehaviour
         chunkGameObject.transform.parent = transform;
         ChunkData chunk = new ChunkData(chunkGameObject); 
         chunk.Initialize(coord, ChunkManager.Instance.settings.chunkSize);
+        if(this.noiseTex == null)
+        {
+            GenerateNoiseTex();
+        }
         chunk.SetNoiseTexture(noiseTex);
         ChunkManager.Instance.chunkStore.AddChunk(coord, chunk);
         return chunk;

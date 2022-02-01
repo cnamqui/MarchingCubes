@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using UnityEngine;
-
+using UnityEngine; 
+using System.Linq;
 
 
 [RequireComponent(typeof(ChunkFactory))]
@@ -79,8 +79,11 @@ public class ChunkManager : MonoBehaviour
         {
             // move chunks around here
             var reusableChunks = chunkStore.GetChunkCoordinatesOutsideOfRange(playerChunk, settings.viewRadius);
-            var newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk,playerChunk,settings.viewRadius); 
+            var newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
 
+            //var i = 0;
+            //foreach(var rChunk in chunkStore)
+            
             _lastPlayerChunk = playerChunk;
         }
     }
