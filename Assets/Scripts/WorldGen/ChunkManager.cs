@@ -75,14 +75,30 @@ public class ChunkManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(math.all( playerChunk != _lastPlayerChunk) && !lockProcGen)
+        if(math.any( playerChunk != _lastPlayerChunk) && !lockProcGen)
         {
             // move chunks around here
-            var reusableChunks = chunkStore.GetChunkCoordinatesOutsideOfRange(playerChunk, settings.viewRadius);
+            var reusableChunks = chunkStore.GetChunkCoordinatesOutsideOfRange(playerChunk, settings.viewRadius).ToArray();
             var newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
 
-            //var i = 0;
-            //foreach(var rChunk in chunkStore)
+            var i = 0;
+            //newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
+            foreach (var rChunkCoords in reusableChunks)
+            {
+                if (i >= newCoordsInRange.Length) break;
+                var newCoords = newCoordsInRange[i];
+                chunkStore.MoveChunk(rChunkCoords, newCoords);
+                voxelFactory.CreateEmptyVoxelsAt(newCoords);
+                voxelFactory.EnqueueVoxelForDataGeneration(newCoords, true);
+                i++;
+            }
+            for(int j = i; j < newCoordsInRange.Length; j++)
+            { 
+                var newCoords = newCoordsInRange[j];
+                voxelFactory.CreateEmptyVoxelsAt(newCoords);
+                chunkFactory.CreateEmptyChunkAt(newCoords);
+                voxelFactory.EnqueueVoxelForDataGeneration(newCoords, true);
+            }
             
             _lastPlayerChunk = playerChunk;
         }

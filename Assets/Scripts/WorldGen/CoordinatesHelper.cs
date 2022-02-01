@@ -21,7 +21,7 @@ public static class CoordinatesHelper
             {
                 for(int z= - radius; z<=radius; z++)
                 {   
-                    int3 currentCoord = new int3(x, y, z);
+                    int3 currentCoord = new int3(x, y, z) + center;
                     var distance = math.abs(math.distance(center, currentCoord));
                     var withinUDClamp = center.y - currentCoord.y <= underworldDrawClamp;
                     var belowHighestPoint = currentCoord.y <= topChunk;
@@ -34,16 +34,29 @@ public static class CoordinatesHelper
 
     public static IEnumerable<int3> GetChunkCoordinatesDelta(int3 oldCoord, int3 newCoord, int range)
     {
+
+        var settings = ChunkManager.Instance.settings;
+        float maxOverworldHeight = settings.maxOverworldHeight;
+        int overworldStartAt = settings.overworldStartAt;
+        int topChunk = Mathf.CeilToInt(maxOverworldHeight / settings.chunkSize) + overworldStartAt;
+        int underworldDrawClamp = settings.underworldDrawClamp;
         for (int x = -range; x <= range; x++)
         {
             for (int y = -range; y <= range; y++)
             {
                 for (int z = -range; z <= range; z++)
                 {
-                    int3 currentCoord = new int3(x, y, z);
+                    int3 currentCoord = new int3(x, y, z) + newCoord;
                     var distanceFromOld = math.abs(math.distance(currentCoord, oldCoord));
-                    var distanceFromNew = math.abs(math.distance(currentCoord, newCoord));
-                    if (distanceFromOld > (float)range && distanceFromNew <= (float)range)
+                    var distanceFromNew = math.abs(math.distance(currentCoord, newCoord)); 
+                    var withinUDClampOfOld = oldCoord.y - currentCoord.y <= underworldDrawClamp;
+                    var withinUDClampOfNew = newCoord.y - currentCoord.y <= underworldDrawClamp;
+                    var belowHighestPoint = currentCoord.y <= topChunk;
+
+                    var inRangeOfNew = (distanceFromNew <= range && withinUDClampOfNew && belowHighestPoint);
+                    var inRangeOfOld = (distanceFromOld <= range && withinUDClampOfOld && belowHighestPoint);
+
+                    if (inRangeOfNew && !inRangeOfOld)
                     {
                         yield return currentCoord;
                     }

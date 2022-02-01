@@ -10,13 +10,13 @@ public class VoxelFactory : MonoBehaviour
 {
     [SerializeField] int throttle = 10; 
     [SerializeField] ComputeShader noiseCompute;
-    private Queue<int3> queue;
+    private Queue<(int3,bool)> queue;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        queue = new Queue<int3>();
+        queue = new Queue<(int3,bool)>();
     }
 
     // Update is called once per frame
@@ -25,8 +25,9 @@ public class VoxelFactory : MonoBehaviour
         int ct = 0;
         while (queue.Count > 0 && ct < throttle)
         {
-            int3 chunkCoordinate = queue.Dequeue();
-
+            var qi = queue.Dequeue();
+            int3 chunkCoordinate = qi.Item1;
+            bool queueForMeshGen = qi.Item2;
             if (ChunkManager.Instance.voxelStore.TryGetVoxel(chunkCoordinate, out VoxelData data))
             {
                 if (!data.hasDensity)
@@ -34,15 +35,17 @@ public class VoxelFactory : MonoBehaviour
                     GenerateNoise(data);
                     ct++;
                 }
+                if(queueForMeshGen) ChunkManager.Instance.chunkFactory.EnqueueChunkForMeshGeneration(chunkCoordinate);
             }
         }
     }
 
-    public void EnqueueVoxelForGeneration(int3 coord)
+    public void EnqueueVoxelForDataGeneration(int3 coord, bool enqueueChunkGeneration = false)
     {
-        if (!ChunkManager.Instance.chunkStore.DoesChunkExistAt(coord) && !queue.Contains(coord))
+        bool alreadyInQueue = queue.Any(qi => math.all(qi.Item1 == coord));
+        if (ChunkManager.Instance.chunkStore.DoesChunkExistAt(coord) && !alreadyInQueue)
         {
-            queue.Enqueue(coord);
+            queue.Enqueue((coord,enqueueChunkGeneration));
         }
     }
 
@@ -107,6 +110,11 @@ public class VoxelFactory : MonoBehaviour
         {
             CreateVoxelsAt(coord);
         }
+    }
+    public void CreateEmptyVoxelsAt(int3 coord)
+    { 
+        VoxelData data = new VoxelData(ChunkManager.Instance.settings.chunkSize, coord); 
+        ChunkManager.Instance.voxelStore.AddVoxel(coord, data);
     }
      
     

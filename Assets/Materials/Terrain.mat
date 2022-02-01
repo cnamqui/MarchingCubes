@@ -82,7 +82,7 @@ Material:
     - _SrcBlend: 1
     - _Test: 0
     - _TexScale: 1
-    - _TopNormalThreshold: 0.73
+    - _TopNormalThreshold: 0.903
     - _UVSec: 0
     - _ZWrite: 1
     - _gScale: 20

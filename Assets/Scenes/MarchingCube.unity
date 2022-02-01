@@ -290,7 +290,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8425076, y: 1}
+    m_SensorSize: {x: 0.6116208, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -363,7 +363,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8425076, y: 1}
+    m_SensorSize: {x: 0.6116208, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -990,7 +990,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8425076, y: 1}
+    m_SensorSize: {x: 0.6116208, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1264,7 +1264,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8425076, y: 1}
+    m_SensorSize: {x: 0.6116208, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1343,7 +1343,7 @@ MonoBehaviour:
     densitySettings:
       octaves: 8
       scale: 0.75
-      persistence: 0.52
+      persistence: 0.39
       lacunarity: 2
       noiseOffset:
         x: 0
@@ -1379,7 +1379,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42e1269ba9cce8f4db864f3371a5723e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throttle: 10
+  throttle: 4
   noiseCompute: {fileID: 7200000, guid: f8d654fe9da67914b917323ab3343d2d, type: 3}
 --- !u!114 &1669751382
 MonoBehaviour:
@@ -1433,6 +1433,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkObjectPrefab: {fileID: 8738187605475593614, guid: ff0c290a6222ddb408cb8a2dbe6cf8b7, type: 3}
-  throttle: 10
+  throttle: 4
   noiseTexCompute: {fileID: 7200000, guid: fae53fc36630b7b488100a3972d1ad86, type: 3}
   noiseTex: {fileID: 0}

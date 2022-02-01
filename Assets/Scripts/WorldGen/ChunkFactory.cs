@@ -42,9 +42,9 @@ public class ChunkFactory : MonoBehaviour
     }
 
 
-    public void EnqueueChunkForGeneration(int3 coord)
+    public void EnqueueChunkForMeshGeneration(int3 coord)
     {
-        if(!ChunkManager.Instance.chunkStore.DoesChunkExistAt(coord) && !queue.Contains(coord))
+        if(ChunkManager.Instance.chunkStore.DoesChunkExistAt(coord) && !queue.Contains(coord))
         {
             queue.Enqueue(coord);
         }
@@ -74,6 +74,13 @@ public class ChunkFactory : MonoBehaviour
         {
             var chunk = CreateChunk(coord);
             ChunkManager.Instance.chunkUpdater.GenerateMesh(chunk);
+        }
+    }
+    public void CreateEmptyChunkAt(int3 coord)
+    {
+        if (!ChunkManager.Instance.chunkStore.DoesChunkExistAt(coord))
+        {
+            var chunk = CreateChunk(coord); 
         }
     }
 
