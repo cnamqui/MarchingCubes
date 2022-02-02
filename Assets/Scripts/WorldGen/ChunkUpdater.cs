@@ -129,7 +129,7 @@ public class ChunkUpdater : MonoBehaviour
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
              
 
-            var verts = new Vert[vertCount];
+            var verts = new Vertex[vertCount];
             vertBuffer.GetData(verts, 0, 0, vertCount);
             var triangleIndices = new int[vertCount];
             triangleIndexBuffer.GetData(triangleIndices,0,0,vertCount);
