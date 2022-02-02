@@ -30,9 +30,9 @@ public class ChunkManager : MonoBehaviour
 
     public int3 playerChunk { get
         {
-            int x = Mathf.FloorToInt(playerTransform.position.x / (float)settings.chunkSize);
-            int y = Mathf.FloorToInt(playerTransform.position.y / (float)settings.chunkSize);
-            int z = Mathf.FloorToInt(playerTransform.position.z / (float)settings.chunkSize);
+            int x = Mathf.FloorToInt(playerTransform.position.x / (float)(settings.chunkSize * settings.chunkScale));
+            int y = Mathf.FloorToInt(playerTransform.position.y / (float)(settings.chunkSize * settings.chunkScale));
+            int z = Mathf.FloorToInt(playerTransform.position.z / (float)(settings.chunkSize * settings.chunkScale));
             return new int3(x, y, z);
         } }
 

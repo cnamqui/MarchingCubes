@@ -66,7 +66,7 @@ public class ChunkStore :MonoBehaviour {
 
         existingChunk.meshCollider.enabled = false;
         existingChunk.meshRenderer.enabled = false;
-        existingChunk.Initialize(chunkCoordinate, ChunkManager.Instance.settings.chunkSize);
+        existingChunk.Initialize(chunkCoordinate, ChunkManager.Instance.settings.chunkSize, ChunkManager.Instance.settings.chunkScale);
         AddChunk(chunkCoordinate, existingChunk);
     }
      

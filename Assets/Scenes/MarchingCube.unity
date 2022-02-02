@@ -1297,6 +1297,7 @@ MonoBehaviour:
     maxOverworldHeight: 180.23
     underworldDrawClamp: 1
     overworldStartAt: 0
+    chunkScale: 10
   lockProcGen: 0
 --- !u!114 &1669751381
 MonoBehaviour:
