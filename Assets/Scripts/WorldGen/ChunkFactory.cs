@@ -35,7 +35,7 @@ public class ChunkFactory : MonoBehaviour
                 if (!chunk.hasMesh)
                 {
                     ChunkManager.Instance.chunkUpdater.GenerateMesh(chunk);
-                    ct++;
+                    ct++; 
                 }
             }
         }
