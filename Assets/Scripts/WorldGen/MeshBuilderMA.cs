@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class MeshBuilder : System.IDisposable
+public class MeshBuilderMA : System.IDisposable
 {
     public Mesh Mesh => _mesh;
     ComputeShader marchingCubesCompute;
@@ -21,7 +21,7 @@ public class MeshBuilder : System.IDisposable
     int _maxTriangles;
     int _threadGroupsX;
 
-    public MeshBuilder(ChunkData chunk, VoxelData voxelData, ChunkSettings settings, ComputeShader compute)
+    public MeshBuilderMA(ChunkData chunk, VoxelData voxelData, ChunkSettings settings, ComputeShader compute)
     {
         Initialize(chunk, voxelData, settings, compute);
     }
@@ -84,10 +84,10 @@ public class MeshBuilder : System.IDisposable
         marchingCubesCompute.Dispatch(kernel, _threadGroupsX, 1, 1);
 
         //clear unused area of the buffers.
-        marchingCubesCompute.SetBuffer(1, "vertices", _vertexBuffer);
-        marchingCubesCompute.SetBuffer(1, "triangleIndices", _indexBuffer);
-        marchingCubesCompute.SetBuffer(1, "triangleCounter", counterBuffer);
-        marchingCubesCompute.Dispatch(1, 1, 1, 1);
+        //marchingCubesCompute.SetBuffer(1, "vertices", _vertexBuffer);
+        //marchingCubesCompute.SetBuffer(1, "triangleIndices", _indexBuffer);
+        //marchingCubesCompute.SetBuffer(1, "triangleCounter", counterBuffer);
+        //marchingCubesCompute.Dispatch(1, 1, 1, 1);
 
         // Bounding box
         var ext = new Vector3(settings.chunkSize, settings.chunkSize, settings.chunkSize);

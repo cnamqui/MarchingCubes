@@ -44,7 +44,7 @@ public class ChunkUpdater : MonoBehaviour
 
             ChunkSettings settings = ChunkManager.Instance.settings;
 
-            var _builder = new MeshBuilder(chunk, voxelData, ChunkManager.Instance.settings, marchingCubesComputeMeshDirect);
+            var _builder = new MeshBuilderMA(chunk, voxelData, ChunkManager.Instance.settings, marchingCubesComputeMeshDirect);
 
             _builder.Build();
 
@@ -90,7 +90,7 @@ public class ChunkUpdater : MonoBehaviour
             ComputeBuffer triangleCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Counter);
             ComputeBuffer dgridBuffer = new ComputeBuffer(voxelData.density.Length, sizeof(float));
             ComputeBuffer triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
-            ComputeBuffer triCountBuffer2 = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
+            //ComputeBuffer triCountBuffer2 = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
             //triCountBuffer.SetData(triCountData);
             dgridBuffer.SetData(voxelData.density);
 
@@ -170,5 +170,22 @@ public class ChunkUpdater : MonoBehaviour
             triangleCountBuffer.Dispose();
             dgridBuffer.Dispose();
         }
+    }
+
+
+    public QueuedMeshBuilder GenerateMeshAsync(ChunkData chunk)
+    {
+        return GenerateMeshGPUAsync(chunk);
+    }
+
+    public QueuedMeshBuilder GenerateMeshGPUAsync(ChunkData chunk)
+    {
+        if (ChunkManager.Instance.voxelStore.TryGetVoxel(chunk.chunkCoord, out VoxelData voxelData))
+        {
+            var builder = new MeshBuilderGPUAsync(chunk.chunkCoord, chunk, voxelData, marchingCubesCompute2);
+            StartCoroutine(builder.Build());
+            return builder;
+        }
+        return null;
     }
 }
