@@ -17,4 +17,6 @@ public class ChunkSettings
     public float maxOverworldHeight;
     public int underworldDrawClamp;//in chunks;  
     public int overworldStartAt = 0;
+    public float chunkScale = 1f;
+    public int softLockProcGenRadius = 3;
 }

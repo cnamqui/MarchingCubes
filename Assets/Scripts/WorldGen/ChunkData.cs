@@ -24,10 +24,10 @@ public class ChunkData
     }
 
 
-    public void Initialize(int3 coord, int chunkSize)
+    public void Initialize(int3 coord, int chunkSize, float scale)
     {
         int3 _pos = (coord * chunkSize);
-        this.gameObject.transform.position = new Vector3(_pos.x, _pos.y, _pos.z);
+        this.gameObject.transform.position = new Vector3(_pos.x, _pos.y, _pos.z) * scale;
         this.chunkCoord = coord;
         this.hasChanges = false;
         this.hasMesh = false;

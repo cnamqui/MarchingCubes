@@ -60,11 +60,12 @@ public class ChunkFactory : MonoBehaviour
     private ChunkData CreateChunk(int3 coord)
     { 
         int3 _pos = (coord * ChunkManager.Instance.settings.chunkSize);
-        Vector3 worldPos = new Vector3(_pos.x, _pos.y, _pos.z);
+        Vector3 worldPos = new Vector3(_pos.x, _pos.y, _pos.z) * ChunkManager.Instance.settings.chunkScale;
         GameObject chunkGameObject = Instantiate(chunkObjectPrefab, worldPos, Quaternion.identity); 
         chunkGameObject.transform.parent = transform;
+        chunkGameObject.transform.localScale *= ChunkManager.Instance.settings.chunkScale;
         ChunkData chunk = new ChunkData(chunkGameObject); 
-        chunk.Initialize(coord, ChunkManager.Instance.settings.chunkSize);
+        chunk.Initialize(coord, ChunkManager.Instance.settings.chunkSize, ChunkManager.Instance.settings.chunkScale);
         if(this.noiseTex == null)
         {
             GenerateNoiseTex();
