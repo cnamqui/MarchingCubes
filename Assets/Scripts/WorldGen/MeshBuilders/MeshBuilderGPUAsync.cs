@@ -94,14 +94,18 @@ public class MeshBuilderGPUAsync : QueuedMeshBuilder
 
         mesh.SetVertexBufferData(_verts, 0, 0, vertCount, 0, MeshUpdateFlags.DontValidateIndices);
         mesh.SetIndexBufferData(_triIndices, 0, 0, vertCount, MeshUpdateFlags.DontValidateIndices);
-         
+
+        yield return new WaitForEndOfFrame();
 
         mesh.subMeshCount = 1;
         subMesh.indexCount = vertCount;
         mesh.SetSubMesh(0, subMesh);
 
-        triCountBuffer.Dispose(); 
+        triCountBuffer.Dispose();
 
+
+        //var ext = new Vector3(settings.chunkSize, settings.chunkSize, settings.chunkSize);
+        //mesh.bounds = new Bounds(Vector3.zero, ext);
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
         mesh.Optimize();

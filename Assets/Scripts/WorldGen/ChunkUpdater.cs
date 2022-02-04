@@ -188,4 +188,14 @@ public class ChunkUpdater : MonoBehaviour
         }
         return null;
     }
-}
+    public QueuedMeshBuilder GenerateMeshCPUAsync(ChunkData chunk)
+    {
+        if (ChunkManager.Instance.voxelStore.TryGetVoxel(chunk.chunkCoord, out VoxelData voxelData))
+        {
+            var builder = new MeshBuilderCPUAsync(chunk.chunkCoord, chunk, voxelData);
+            StartCoroutine(builder.Build());
+            return builder;
+        }
+        return null;
+    }
+} 
