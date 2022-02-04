@@ -12,13 +12,14 @@ public class ChunkFactory : MonoBehaviour
     [SerializeField] RenderTexture noiseTex;
 
     private Queue<int3> queue;
-
+    private List<QueuedMeshBuilder> concurrentBuilds;
 
 
     // Start is called before the first frame update
     void Start()
     {
         queue = new Queue<int3>();
+        concurrentBuilds = new List<QueuedMeshBuilder>();
         //GenerateNoiseTex();
     }
 
@@ -26,7 +27,7 @@ public class ChunkFactory : MonoBehaviour
     void Update()
     {
         int ct = 0;
-        while (queue.Count > 0 && ct < throttle)
+        while (queue.Count > 0 && ct < throttle && concurrentBuilds.Count < throttle)
         {
             int3 chunkCoordinate = queue.Dequeue();
 
@@ -34,11 +35,16 @@ public class ChunkFactory : MonoBehaviour
             {
                 if (!chunk.hasMesh)
                 {
-                    ChunkManager.Instance.chunkUpdater.GenerateMesh(chunk);
-                    ct++; 
+                    var builder = ChunkManager.Instance.chunkUpdater.GenerateMeshAsync(chunk);
+                    if (builder != null)
+                    {
+                        concurrentBuilds.Add(builder);
+                        ct++;
+                    }
                 }
             }
         }
+        concurrentBuilds.RemoveAll(b => b.done);  
     }
 
 

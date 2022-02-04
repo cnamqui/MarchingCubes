@@ -17,7 +17,8 @@ struct Vert
 StructuredBuffer<float> densityGrid;
 RWByteAddressBuffer triangleIndices;
 RWByteAddressBuffer vertices;
-RWStructuredBuffer<uint> triangleCounter; // used only for counting 
+RWStructuredBuffer<uint> triangleCounter; // used only for counting   
+
 int chunkWidth;
 int chunkHeight;
 int chunkDepth;
@@ -67,7 +68,8 @@ float3 getNormalOnEdge(float4 a, float4 b)
 
     float3 normal = normalize(na + factor * (nb - na));
     return normal;
-} 
+}
+
 void writeVertexAndNormal(uint offset, float3 pos, float3 normal)
 {
     uint addr_p = offset * SIZEOF_FLOAT3 * 2;
@@ -80,6 +82,7 @@ void writeIndices(uint offset, uint3 indices)
 {
     triangleIndices.Store3(offset * SIZEOF_UINT, indices);
 }
+
 
 [numthreads(128, 1, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
@@ -159,17 +162,42 @@ void CSMain(uint3 id : SV_DispatchThreadID)
         float3 normalOnPtOnEdge1 = getNormalOnEdge(cubePoints[edge1VertexA], cubePoints[edge1VertexB]);
         float3 normalOnPtOnEdge2 = getNormalOnEdge(cubePoints[edge2VertexA], cubePoints[edge2VertexB]);
         float3 normalOnPtOnEdge3 = getNormalOnEdge(cubePoints[edge3VertexA], cubePoints[edge3VertexB]);
-          
-        uint count = triangleCounter.IncrementCounter();
          
-        uint vidx = count * 3;
-        writeVertexAndNormal(vidx + 0, vertexOnEdge1, normalOnPtOnEdge1);
-        writeVertexAndNormal(vidx + 1, vertexOnEdge2, normalOnPtOnEdge2);
-        writeVertexAndNormal(vidx + 2, vertexOnEdge3, normalOnPtOnEdge3);
-        writeIndices(vidx, uint3(vidx, vidx + 1, vidx + 2));
-    } 
-}
+        
+        uint count = triangleCounter.IncrementCounter();
 
+        //Tri t;
+        Vert v1, v2, v3;
+        v1.vert = vertexOnEdge1;
+        v2.vert = vertexOnEdge2;
+        v3.vert = vertexOnEdge3;
+        v1.normal = normalOnPtOnEdge1;
+        v2.normal = normalOnPtOnEdge2;
+        v3.normal = normalOnPtOnEdge3;
+        
+        int indS = count * 3;
+        //triangleIndices.Append(int3(indS, indS + 1, indS + 2));
+        //verts[indS + 0] = v1;
+        //verts[indS + 1] = v2;
+        //verts[indS + 2] = v3;
+        
+        writeVertexAndNormal(indS + 0, vertexOnEdge1, normalOnPtOnEdge1);
+        writeVertexAndNormal(indS + 1, vertexOnEdge2, normalOnPtOnEdge2);
+        writeVertexAndNormal(indS + 2, vertexOnEdge3, normalOnPtOnEdge3);
+        
+        writeIndices(indS + 0, indS + 0);
+        writeIndices(indS + 1, indS + 1);
+        writeIndices(indS + 2, indS + 2);
+
+
+        //triangleIndices[indS + 0] = indS + 0;
+        //triangleIndices[indS + 1] = indS + 1;
+        //triangleIndices[indS + 2] = indS + 2;
+    }
+     
+
+
+}
 
 [numthreads(64, 1, 1)]
 void ClearUnused(uint id : SV_DispatchThreadID)
