@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -64,6 +65,14 @@ public static class CoordinatesHelper
             } 
         }
     }
+
+    public static IEnumerable<int3> GetChunkCoordinatesDeltaSorted(int3 oldCoord, int3 newCoord, int range)
+    {
+        var coords = GetChunkCoordinatesDelta(oldCoord,newCoord,range);
+
+        return coords.OrderBy(coord => math.abs(math.distance(newCoord, coord))); 
+    }
+
 
     public static int3 GetWorldGridCoordFromLocalChunkCoord(int3 localCoord, int3 chunkCoord, int chunkSize)
     {

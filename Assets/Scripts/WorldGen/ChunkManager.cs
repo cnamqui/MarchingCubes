@@ -80,7 +80,7 @@ public class ChunkManager : MonoBehaviour
         {
             // move chunks around here
             var reusableChunks = chunkStore.GetChunkCoordinatesOutsideOfRange(playerChunk, settings.viewRadius).ToArray();
-            var newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
+            var newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDeltaSorted(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
 
             var i = 0;
             //newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();

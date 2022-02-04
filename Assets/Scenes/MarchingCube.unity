@@ -290,7 +290,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8947369, y: 1}
+    m_SensorSize: {x: 1.7841079, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -363,7 +363,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8947369, y: 1}
+    m_SensorSize: {x: 1.7841079, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -990,7 +990,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8947369, y: 1}
+    m_SensorSize: {x: 1.7841079, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1195,7 +1195,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.8947369, y: 1}
+    m_SensorSize: {x: 1.7841079, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1293,8 +1293,8 @@ MonoBehaviour:
     isoLevel: 0.6
     chunkSize: 48
     seed: 0
-    viewRadius: 12
-    maxOverworldHeight: 80.23
+    viewRadius: 16
+    maxOverworldHeight: 180.23
     underworldDrawClamp: 3
     overworldStartAt: 0
     chunkScale: 1
@@ -1312,7 +1312,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42e1269ba9cce8f4db864f3371a5723e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throttle: 6
+  throttle: 10
   noiseCompute: {fileID: 7200000, guid: f8d654fe9da67914b917323ab3343d2d, type: 3}
 --- !u!114 &1669751382
 MonoBehaviour:
