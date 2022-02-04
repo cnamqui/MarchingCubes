@@ -24,7 +24,7 @@ public class MeshBuilderCPUAsync : QueuedMeshBuilder
         done = false;
         // March Cubes  
         ChunkSettings settings = ChunkManager.Instance.settings;
-
+         
         int maxTriangles = settings.chunkSize * settings.chunkSize * settings.chunkSize * 5;
 
         NativeArray<float> grid = new NativeArray<float>(voxelData.density.Length,Allocator.TempJob);

@@ -65,25 +65,18 @@ public class MeshBuilderGPUAsync : QueuedMeshBuilder
         if (triCountReq.hasError)
         {
             DisposeBuffers();
+            Debug.Log($"ERROR: triCountReq");
             yield break;
         }
         var vertCountData = triCountReq.GetData<int>();
         int vertCount = vertCountData[0] * 3;
 
-
         var vertRequest = AsyncGPUReadback.Request(vertBuffer);
         var triIndexRequest = AsyncGPUReadback.Request(triangleIndexBuffer);
 
-        yield return new WaitUntil(() => (vertRequest.done && triIndexRequest.done ) || vertRequest.hasError || triIndexRequest.hasError);
-        if (vertRequest.hasError || triIndexRequest.hasError)
-        {
-            DisposeBuffers();
-            yield break;
-        }
-        var _verts = vertRequest.GetData<Vertex>();
-        var _triIndices = triIndexRequest.GetData<int>();
-        DisposeBuffers();
-        // Update Mesh
+        //Initialize the mesh
+
+
         Mesh mesh = new Mesh();
         SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
 
@@ -92,9 +85,56 @@ public class MeshBuilderGPUAsync : QueuedMeshBuilder
         mesh.SetIndexBufferParams(vertCount, IndexFormat.UInt32);
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
-        mesh.SetVertexBufferData(_verts, 0, 0, vertCount, 0, MeshUpdateFlags.DontValidateIndices);
-        mesh.SetIndexBufferData(_triIndices, 0, 0, vertCount, MeshUpdateFlags.DontValidateIndices);
-
+        //result is only available for one frame so we need to copy right after the result is available;
+        //check whether one or the other is complete 
+        yield return new WaitUntil(() =>  vertRequest.done || triIndexRequest.done   || vertRequest.hasError || triIndexRequest.hasError);
+        if (vertRequest.hasError || triIndexRequest.hasError)
+        {
+            if(vertRequest.hasError) Debug.Log($"ERROR: vertRequest");
+            if(triIndexRequest.hasError) Debug.Log($"ERROR: triIndexRequest");
+            DisposeBuffers();
+            yield break;
+        }
+        //To Test: not sure whether they will ever complete at the same frame.
+        //currently we assume only one is complete and we will wait for the other one.
+        if (vertRequest.done && !triIndexRequest.done)
+        {
+            var verts = vertRequest.GetData<Vertex>();
+            SetMeshVertices(mesh, vertCount, verts);
+            yield return new WaitUntil(() =>  triIndexRequest.done || triIndexRequest.hasError);
+            if ( triIndexRequest.hasError)
+            { 
+                if (triIndexRequest.hasError) Debug.Log($"ERROR: triIndexRequest");
+                DisposeBuffers();
+                yield break;
+            }
+            var triIndices = triIndexRequest.GetData<int>();
+            SetMeshTriangleIndices(mesh, vertCount, triIndices);
+        } else if (triIndexRequest.done && !vertRequest.done)
+        { 
+            var triIndices = triIndexRequest.GetData<int>();
+            SetMeshTriangleIndices(mesh, vertCount, triIndices);
+            yield return new WaitUntil(() => vertRequest.done || vertRequest.hasError);
+            if (vertRequest.hasError)
+            {
+                if (vertRequest.hasError) Debug.Log($"ERROR: vertRequest");
+                DisposeBuffers();
+                yield break;
+            }
+            var verts = vertRequest.GetData<Vertex>();
+            SetMeshVertices(mesh, vertCount, verts);
+        }
+        else// just in case they are both done
+        {
+            var verts = vertRequest.GetData<Vertex>();
+            SetMeshVertices(mesh, vertCount, verts);
+            var triIndices = triIndexRequest.GetData<int>();
+            SetMeshTriangleIndices(mesh, vertCount, triIndices);
+        } 
+        DisposeBuffers();
+        // Finalize Mesh
+         
+          
         yield return new WaitForEndOfFrame();
 
         mesh.subMeshCount = 1;
@@ -123,10 +163,20 @@ public class MeshBuilderGPUAsync : QueuedMeshBuilder
     } 
     void DisposeBuffers()
     {
+        done = true;
         vertBuffer?.Dispose();
         triangleIndexBuffer?.Dispose();
         triangleCountBuffer?.Dispose();
         dgridBuffer?.Dispose();
         triCountBuffer?.Dispose(); 
+    }
+
+    void SetMeshVertices(Mesh mesh, int vertCount, NativeArray<Vertex> vertices)
+    {
+        mesh.SetVertexBufferData(vertices, 0, 0, vertCount, 0, MeshUpdateFlags.DontValidateIndices); 
+    }
+    void SetMeshTriangleIndices(Mesh mesh, int vertCount, NativeArray<int> triIndices)
+    { 
+        mesh.SetIndexBufferData(triIndices, 0, 0, vertCount, MeshUpdateFlags.DontValidateIndices);
     }
 }
