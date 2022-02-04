@@ -75,11 +75,12 @@ public class ChunkManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(math.any( playerChunk != _lastPlayerChunk) && !lockProcGen)
+        var distanceFromLastChunk =  math.abs(math.distance(playerChunk, _lastPlayerChunk));
+        if(distanceFromLastChunk >= (float) settings.softLockProcGenRadius && !lockProcGen)
         {
             // move chunks around here
             var reusableChunks = chunkStore.GetChunkCoordinatesOutsideOfRange(playerChunk, settings.viewRadius).ToArray();
-            var newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
+            var newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDeltaSorted(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
 
             var i = 0;
             //newCoordsInRange = CoordinatesHelper.GetChunkCoordinatesDelta(_lastPlayerChunk, playerChunk, settings.viewRadius).ToArray();
