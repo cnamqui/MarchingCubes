@@ -175,6 +175,10 @@ public class ChunkUpdater : MonoBehaviour
 
     public QueuedMeshBuilder GenerateMeshAsync(ChunkData chunk)
     {
+        if(ChunkManager.Instance.settings.asyncRenderMode == AsyncRenderMode.CPU)
+        {
+            return GenerateMeshCPUAsync(chunk);
+        }
         return GenerateMeshGPUAsync(chunk);
     }
 
