@@ -54,6 +54,9 @@ public class ChunkManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        var sd = SettingsManager.Load();
+        this.settings = sd.chunkSettings;
+
         if (settings.seed == 0)
             settings.seed = UnityEngine.Random.Range(-1000000, 1000000);
         System.Random random = new System.Random(settings.seed);
