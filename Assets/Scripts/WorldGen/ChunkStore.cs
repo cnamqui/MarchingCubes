@@ -82,20 +82,11 @@ public class ChunkStore :MonoBehaviour {
     {
         _chunks.Add(chunkCoordinate, data);
     } 
-    public IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
-    { 
-        var settings = ChunkManager.Instance.settings;
-        float maxOverworldHeight = settings.maxOverworldHeight;
-        int overworldStartAt = settings.overworldStartAt;
-        int topChunk = Mathf.CeilToInt(maxOverworldHeight / settings.chunkSize) + overworldStartAt;
-        int underworldDrawClamp = settings.underworldDrawClamp;
-
+    public IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 center, int range)
+    {  
         foreach (int3 chunkCoordinate in _chunks.Keys )
-        {
-            var distance = math.abs(math.distance(coordinate, chunkCoordinate));
-            var underworldDistanceLowerThanClamp = coordinate.y - chunkCoordinate.y >underworldDrawClamp;
-            var chunkHigherThanHighestPoint = chunkCoordinate.y > topChunk;
-            if(distance > (float)range || underworldDistanceLowerThanClamp || chunkHigherThanHighestPoint)
+        { 
+            if(!CoordinatesHelper.IsCoordinateInRange(center,chunkCoordinate,range))
             {
                 yield return chunkCoordinate;
             }
