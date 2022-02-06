@@ -20,6 +20,8 @@ public class ChunkSettings
     public float chunkScale = 1f;
     public int softLockProcGenRadius = 5;
     public AsyncRenderMode asyncRenderMode = AsyncRenderMode.GPU;
+    public int voxelProcessingThrottle = 10;
+    public int proceduralMeshProcessingThrottle = 6;
 }
 
 

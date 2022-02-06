@@ -19,7 +19,7 @@ public class ChunkManager : MonoBehaviour
     [Header("Chunk Settings")]
     [SerializeField] public ChunkSettings settings;
     [Tooltip("Lock procedural generation. If true chunks will not be procedurally spawned around the player")]
-    [SerializeField] public bool lockProcGen = false;
+    [SerializeField] public bool lockProcGen = false; 
 
     public ChunkFactory chunkFactory {get; private set;}
     public ChunkStore chunkStore { get; private set; } 
@@ -48,15 +48,16 @@ public class ChunkManager : MonoBehaviour
         chunkUpdater = GetComponent<ChunkUpdater>();
         voxelStore = GetComponent<VoxelStore>();
         voxelFactory = GetComponent<VoxelFactory>();
-
+        if (!Application.isEditor)
+        {
+            var sd = SettingsManager.Load();
+            this.settings = sd.chunkSettings;
+        }
     }
 
     // Start is called before the first frame update
     void Start()
-    {
-        var sd = SettingsManager.Load();
-        this.settings = sd.chunkSettings;
-
+    { 
         if (settings.seed == 0)
             settings.seed = UnityEngine.Random.Range(-1000000, 1000000);
         System.Random random = new System.Random(settings.seed);

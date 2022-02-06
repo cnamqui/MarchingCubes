@@ -16,7 +16,8 @@ public class VoxelFactory : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        queue = new Queue<(int3,bool)>();
+        queue = new Queue<(int3,bool)>(); 
+        this.throttle = ChunkManager.Instance.settings.voxelProcessingThrottle;
     }
 
     // Update is called once per frame

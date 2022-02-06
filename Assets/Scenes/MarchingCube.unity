@@ -290,7 +290,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 2.177331, y: 1}
+    m_SensorSize: {x: 0.89945155, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -306,7 +306,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 591593020}
-  m_LocalRotation: {x: 0.079849735, y: -0.6578683, z: 0.07045733, w: 0.7455663}
+  m_LocalRotation: {x: 0.079849735, y: -0.6578684, z: 0.07045734, w: 0.74556625}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -363,7 +363,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 2.177331, y: 1}
+    m_SensorSize: {x: 0.89945155, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -801,7 +801,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1254133274}
-  m_LocalRotation: {x: 0.093362264, y: -0.6564819, z: 0.082380444, w: 0.74399495}
+  m_LocalRotation: {x: 0.09336225, y: -0.6564819, z: 0.082380444, w: 0.74399495}
   m_LocalPosition: {x: 16.867756, y: 105, z: -2.1163294}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -990,7 +990,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 2.177331, y: 1}
+    m_SensorSize: {x: 0.89945155, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1195,7 +1195,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 2.177331, y: 1}
+    m_SensorSize: {x: 0.89945155, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -1291,16 +1291,17 @@ MonoBehaviour:
         z: 0
     overlayHeightmapOverDensity: 0
     isoLevel: 0.6
-    chunkSize: 48
+    chunkSize: 96
     seed: 0
-    viewRadius: 16
+    viewRadius: 6
     maxOverworldHeight: 180.23
-    underworldDrawClamp: 3
+    underworldDrawClamp: 1
     overworldStartAt: 0
     chunkScale: 1
     softLockProcGenRadius: 3
     asyncRenderMode: 0
   lockProcGen: 0
+  useSettingsFile: 0
 --- !u!114 &1669751381
 MonoBehaviour:
   m_ObjectHideFlags: 0

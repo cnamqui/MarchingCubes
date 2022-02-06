@@ -19,8 +19,8 @@ public class ChunkFactory : MonoBehaviour
     void Start()
     {
         queue = new Queue<int3>();
-        concurrentBuilds = new List<QueuedMeshBuilder>();
-        //GenerateNoiseTex();
+        concurrentBuilds = new List<QueuedMeshBuilder>();  
+        this.throttle = ChunkManager.Instance.settings.proceduralMeshProcessingThrottle; 
     }
 
     // Update is called once per frame
