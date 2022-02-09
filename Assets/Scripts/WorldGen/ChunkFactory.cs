@@ -12,14 +12,14 @@ public class ChunkFactory : MonoBehaviour
     [SerializeField] RenderTexture noiseTex;
 
     private Queue<int3> queue;
-    private List<QueuedMeshBuilder> concurrentBuilds;
+    private List<IAsyncMeshBuilder> concurrentBuilds;
 
 
     // Start is called before the first frame update
     void Start()
     {
         queue = new Queue<int3>();
-        concurrentBuilds = new List<QueuedMeshBuilder>();  
+        concurrentBuilds = new List<IAsyncMeshBuilder>();  
         this.throttle = ChunkManager.Instance.settings.proceduralMeshProcessingThrottle; 
     }
 
@@ -35,7 +35,7 @@ public class ChunkFactory : MonoBehaviour
             {
                 if (!chunk.hasMesh)
                 {
-                    var builder = ChunkManager.Instance.chunkUpdater.GenerateMeshAsync(chunk);
+                    var builder = ChunkManager.Instance.meshFactory.GenerateMeshAsync(chunk);
                     if (builder != null)
                     {
                         concurrentBuilds.Add(builder);
@@ -44,7 +44,7 @@ public class ChunkFactory : MonoBehaviour
                 }
             }
         }
-        concurrentBuilds.RemoveAll(b => b.done);  
+        concurrentBuilds.RemoveAll(b => b.isAsyncBuildDone);  
     }
 
 
@@ -80,7 +80,7 @@ public class ChunkFactory : MonoBehaviour
         if (!ChunkManager.Instance.chunkStore.DoesChunkExistAt(coord))
         {
             var chunk = CreateChunk(coord);
-            ChunkManager.Instance.chunkUpdater.GenerateMesh(chunk);
+            ChunkManager.Instance.meshFactory.GenerateMeshAndUpdateChunk(chunk);
         }
     }
     public void CreateEmptyChunkAt(int3 coord)

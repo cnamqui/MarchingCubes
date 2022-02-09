@@ -10,6 +10,8 @@ using System.Linq;
 [RequireComponent(typeof(ChunkUpdater))]
 [RequireComponent(typeof(VoxelStore))]
 [RequireComponent(typeof(VoxelFactory))]
+[RequireComponent(typeof(MeshStore))]
+[RequireComponent(typeof(MeshFactory))]
 public class ChunkManager : MonoBehaviour
 {
     public static ChunkManager Instance { get; private set; }
@@ -23,9 +25,11 @@ public class ChunkManager : MonoBehaviour
 
     public ChunkFactory chunkFactory {get; private set;}
     public ChunkStore chunkStore { get; private set; } 
-    public ChunkUpdater chunkUpdater {get; private set;} 
-    public VoxelStore voxelStore {get; private set;} 
-    public VoxelFactory voxelFactory {get; private set;}
+    public ChunkUpdater chunkUpdater {get; private set; }
+    public VoxelStore voxelStore { get; private set; }
+    public VoxelFactory voxelFactory { get; private set; }
+    public MeshStore meshStore { get; private set; }
+    public MeshFactory meshFactory { get; private set; }
 
 
     public int3 playerChunk { get
@@ -48,6 +52,8 @@ public class ChunkManager : MonoBehaviour
         chunkUpdater = GetComponent<ChunkUpdater>();
         voxelStore = GetComponent<VoxelStore>();
         voxelFactory = GetComponent<VoxelFactory>();
+        meshStore = GetComponent<MeshStore>();
+        meshFactory = GetComponent<MeshFactory>();
         if (!Application.isEditor)
         {
             var sd = SettingsManager.Load();

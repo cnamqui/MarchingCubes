@@ -5,29 +5,67 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class MeshBuilderCPUAsync : QueuedMeshBuilder
-{ 
-    ComputeShader marchingCubesCompute;
-    int3 coord;
-    ChunkData chunk;
+public class MeshBuilderCPU : IAsyncMeshBuilder, IMeshBuilder
+{  
+    int3 coord; 
     VoxelData voxelData;
+    public bool isAsyncBuildDone { get; set; }
+    public Mesh asyncMeshResult { get; private set; }
+
+    Mesh _mesh;
      
-    public MeshBuilderCPUAsync(int3 coord, ChunkData chunk, VoxelData voxelData )
+    public MeshBuilderCPU(int3 coord, VoxelData voxelData )
     { 
         this.coord = coord;
-        this.voxelData = voxelData;
-        this.chunk = chunk;
-        this.done = false;
+        this.voxelData = voxelData; 
+        this.isAsyncBuildDone = false;
+    } 
+    public Mesh Build()
+    { 
+        var job = CreateJob();
+        var jobHandler = job.Schedule(); 
+        jobHandler.Complete();
+        var mesh = CreateMeshFromJobResults(job); 
+        JobCleanup(job);
+        return mesh;
     }
-    public override IEnumerator Build()
+
+    public IEnumerator StartBuild()
     {
-        done = false;
-        // March Cubes  
+        isAsyncBuildDone = false; 
+        var job = CreateJob(); 
+        var jobHandler = job.Schedule();
+
+        yield return new WaitUntil(() => jobHandler.IsCompleted);
+        jobHandler.Complete();
+        asyncMeshResult = CreateMeshFromJobResults(job);
+        isAsyncBuildDone = true;
+
+        JobCleanup(job); 
+    }
+
+    public IEnumerator StartBuildAndUpdate(ChunkData chunk)
+    {
+        yield return this.StartBuild(); 
+        ChunkMeshHelper.UpdateChunkMesh(chunk, asyncMeshResult);
+        //chunk.meshFilter.sharedMesh = asyncMeshResult;
+        //chunk.meshCollider.sharedMesh = asyncMeshResult;
+
+        //chunk.meshCollider.enabled = true;
+        //chunk.meshRenderer.enabled = true;
+
+        //chunk.hasChanges = false;
+
+        //chunk.hasMesh = true;
+    }
+
+    MarchCubesJob CreateJob()
+    {
         ChunkSettings settings = ChunkManager.Instance.settings;
-         
+
         int maxTriangles = settings.chunkSize * settings.chunkSize * settings.chunkSize * 5;
 
-        NativeArray<float> grid = new NativeArray<float>(voxelData.density.Length,Allocator.TempJob);
+        NativeArray<float> grid = new NativeArray<float>(voxelData.density.Length, Allocator.TempJob);
         NativeArray<uint> triangleIndices = new NativeArray<uint>(maxTriangles * 3, Allocator.TempJob);
         NativeArray<Vertex> vertices = new NativeArray<Vertex>(maxTriangles * 3, Allocator.TempJob);
         NativeCounter triCounter = new NativeCounter(Allocator.TempJob);
@@ -43,14 +81,19 @@ public class MeshBuilderCPUAsync : QueuedMeshBuilder
             vertices = vertices,
             triCounter = triCounter
         };
+        return job;
+    }
+    void JobCleanup(MarchCubesJob job)
+    {
+        job.grid.Dispose();
+        job.triangleIndices.Dispose();
+        job.vertices.Dispose();
+        job.triCounter.Dispose();
+    }
 
-        var jobHandler = job.Schedule();
-
-        yield return new WaitUntil(() => jobHandler.IsCompleted);
-        jobHandler.Complete();
+    Mesh CreateMeshFromJobResults( MarchCubesJob job)
+    {
         var vertCount = job.triCounter.Count * 3;
-
-        //// Update Mesh
         Mesh mesh = new Mesh();
         SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
 
@@ -61,42 +104,14 @@ public class MeshBuilderCPUAsync : QueuedMeshBuilder
 
         mesh.SetVertexBufferData(job.vertices, 0, 0, vertCount, 0, MeshUpdateFlags.DontValidateIndices);
         mesh.SetIndexBufferData(job.triangleIndices, 0, 0, vertCount, MeshUpdateFlags.DontValidateIndices);
-
-        yield return new WaitForEndOfFrame();
+         
         mesh.subMeshCount = 1;
         subMesh.indexCount = vertCount;
         mesh.SetSubMesh(0, subMesh);
 
-
-        //var ext = new Vector3(settings.chunkSize, settings.chunkSize, settings.chunkSize);
-        //mesh.bounds = new Bounds(Vector3.zero, ext);
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
         mesh.Optimize();
-
-        chunk.meshFilter.sharedMesh = mesh;
-        chunk.meshCollider.sharedMesh = mesh;
-
-        chunk.meshCollider.enabled = true;
-        chunk.meshRenderer.enabled = true;
-
-        chunk.hasChanges = false;
-
-        chunk.hasMesh = true;
-        done = true;
-
-        grid.Dispose();
-        triangleIndices.Dispose();
-        vertices.Dispose();
-        triCounter.Dispose();
-
-    }
-    void DisposeBuffers()
-    {
-        //vertBuffer?.Dispose();
-        //triangleIndexBuffer?.Dispose();
-        //triangleCountBuffer?.Dispose();
-        //dgridBuffer?.Dispose();
-        //triCountBuffer?.Dispose(); 
+        return mesh;
     }
 }
