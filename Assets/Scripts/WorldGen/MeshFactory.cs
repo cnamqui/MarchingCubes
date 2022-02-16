@@ -32,6 +32,10 @@ public class MeshFactory : MonoBehaviour
             {
                 return GenerateMeshCPU(chunk, voxelData);
             }
+            //else if (ChunkManager.Instance.settings.asyncRenderMode == AsyncRenderMode.GPUExp)
+            //{
+            //    return GenerateMeshGPUExperimental(chunk, voxelData);
+            //}
             return GenerateMeshGPU(chunk, voxelData);
         }
         return null;
@@ -45,36 +49,7 @@ public class MeshFactory : MonoBehaviour
             ChunkMeshHelper.UpdateChunkMesh(chunk, mesh );
         }
     }
-
-
-    void GenerateMeshViaMeshApi(ChunkData chunk)
-    {
-        if (ChunkManager.Instance.voxelStore.TryGetVoxel(chunk.chunkCoord, out VoxelData voxelData))
-        {
-            // March Cubes
-
-            ChunkSettings settings = ChunkManager.Instance.settings;
-
-            var _builder = new MeshBuilderMA(chunk, voxelData, ChunkManager.Instance.settings, marchingCubesComputeMeshDirect);
-
-            _builder.Build();
-
-            var mesh = _builder.Mesh;
-            // Update Mesh   
-            //mesh.Optimize();
-            chunk.meshFilter.sharedMesh = mesh;
-            //chunk.meshCollider.sharedMesh = mesh; 
-            //chunk.meshCollider.enabled = true;
-            chunk.meshRenderer.enabled = true;
-
-            chunk.hasChanges = false;
-
-            chunk.hasMesh = true;
-            //_builder.Dispose();
-        }
-    }
-
-
+     
     void GenerateMeshGPUOld(ChunkData chunk)
     {
         if (ChunkManager.Instance.voxelStore.TryGetVoxel(chunk.chunkCoord, out VoxelData voxelData))
@@ -215,7 +190,12 @@ public class MeshFactory : MonoBehaviour
     Mesh GenerateMeshGPU(ChunkData chunk, VoxelData voxelData)
     {
         var builder = new MeshBuilderGPU(chunk.chunkCoord, voxelData, marchingCubesCompute2);
-        return builder.Build(); 
+        return builder.Build();
+    }
+    Mesh GenerateMeshGPUExperimental(ChunkData chunk, VoxelData voxelData)
+    {
+        var builder = new MeshBuilderMA( voxelData, ChunkManager.Instance.settings, marchingCubesComputeMeshDirect);
+        return builder.Build();
     }
     Mesh GenerateMeshCPU(ChunkData chunk, VoxelData voxelData)
     { 

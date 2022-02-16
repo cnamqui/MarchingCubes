@@ -490,6 +490,8 @@ GameObject:
   - component: {fileID: 1669751382}
   - component: {fileID: 1669751381}
   - component: {fileID: 1669751380}
+  - component: {fileID: 1669751387}
+  - component: {fileID: 1669751386}
   m_Layer: 0
   m_Name: ChunkManager
   m_TagString: Untagged
@@ -548,13 +550,15 @@ MonoBehaviour:
     isoLevel: 0.6
     chunkSize: 48
     seed: 0
-    viewRadius: 10
+    viewRadius: 6
     maxOverworldHeight: 180.23
-    underworldDrawClamp: 3
+    underworldDrawClamp: 1
     overworldStartAt: 0
     chunkScale: 2
     softLockProcGenRadius: 5
     asyncRenderMode: 0
+    voxelProcessingThrottle: 10
+    proceduralMeshProcessingThrottle: 6
   lockProcGen: 0
 --- !u!114 &1669751381
 MonoBehaviour:
@@ -594,9 +598,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac35eebd794acdd4c8be7f5a7bd05460, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  marchingCubesCompute: {fileID: 7200000, guid: 2f47be8cb6dbe894a95794bd2f6ec9fd, type: 3}
-  marchingCubesComputeMeshDirect: {fileID: 7200000, guid: 722038414731b594d9dabf9b80fe0e48, type: 3}
-  marchingCubesCompute2: {fileID: 7200000, guid: ce00f8be83b09ce448816ea7454f39c5, type: 3}
 --- !u!114 &1669751384
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -625,6 +626,33 @@ MonoBehaviour:
   throttle: 4
   noiseTexCompute: {fileID: 7200000, guid: fae53fc36630b7b488100a3972d1ad86, type: 3}
   noiseTex: {fileID: 0}
+--- !u!114 &1669751386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669751378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8faed8fa6e398d4c805d2906fa2016a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  marchingCubesCompute: {fileID: 7200000, guid: 2f47be8cb6dbe894a95794bd2f6ec9fd, type: 3}
+  marchingCubesComputeMeshDirect: {fileID: 7200000, guid: 722038414731b594d9dabf9b80fe0e48, type: 3}
+  marchingCubesCompute2: {fileID: 7200000, guid: ce00f8be83b09ce448816ea7454f39c5, type: 3}
+--- !u!114 &1669751387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669751378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdb7c01442c543f4d96e5257ae07504c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1784530435 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8338988566280778637, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}

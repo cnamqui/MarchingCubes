@@ -110,7 +110,7 @@ public class MeshBuilderGPU : IAsyncMeshBuilder, IMeshBuilder
             SetMeshTriangleIndices(mesh, vertCount, triIndices);
         }
         CleanupAsyncBuild(false); 
-        yield return new WaitForEndOfFrame();
+        yield return null;
         FinalizeMesh(mesh,vertCount);
         asyncMeshResult = mesh;
  
@@ -234,6 +234,6 @@ public class MeshBuilderGPU : IAsyncMeshBuilder, IMeshBuilder
         //mesh.bounds = new Bounds(Vector3.zero, ext);
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-        mesh.Optimize();
+        //mesh.Optimize();
     }
 }

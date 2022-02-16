@@ -35,7 +35,7 @@ public class MeshBuilderCPU : IAsyncMeshBuilder, IMeshBuilder
         isAsyncBuildDone = false; 
         var job = CreateJob(); 
         var jobHandler = job.Schedule();
-
+        yield return null;
         yield return new WaitUntil(() => jobHandler.IsCompleted);
         jobHandler.Complete();
         asyncMeshResult = CreateMeshFromJobResults(job);
@@ -107,11 +107,10 @@ public class MeshBuilderCPU : IAsyncMeshBuilder, IMeshBuilder
          
         mesh.subMeshCount = 1;
         subMesh.indexCount = vertCount;
-        mesh.SetSubMesh(0, subMesh);
-
+        mesh.SetSubMesh(0, subMesh); 
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
-        mesh.Optimize();
+        //mesh.Optimize();
         return mesh;
     }
 }

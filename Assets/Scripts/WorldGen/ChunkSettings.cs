@@ -29,5 +29,6 @@ public class ChunkSettings
 public enum AsyncRenderMode
 {
     GPU,
-    CPU
+    CPU,
+    GPUExp,
 }

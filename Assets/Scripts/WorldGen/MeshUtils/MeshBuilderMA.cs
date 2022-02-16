@@ -5,48 +5,43 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class MeshBuilderMA : System.IDisposable
-{
-    public Mesh Mesh => _mesh;
+public class MeshBuilderMA : System.IDisposable, IAsyncMeshBuilder, IMeshBuilder
+{ 
+    public bool isAsyncBuildDone { get; private set; } 
+    public Mesh asyncMeshResult { get; private set; }
+
     ComputeShader marchingCubesCompute;
     ComputeBuffer counterBuffer;
     ComputeBuffer densityBuffer; 
     Mesh _mesh;
     GraphicsBuffer _vertexBuffer;
-    GraphicsBuffer _indexBuffer; 
-    ChunkData chunk;
+    GraphicsBuffer _indexBuffer;  
     ChunkSettings settings;
     VoxelData voxelData;
 
     int _maxTriangles;
     int _threadGroupsX;
 
-    public MeshBuilderMA(ChunkData chunk, VoxelData voxelData, ChunkSettings settings, ComputeShader compute)
+    public MeshBuilderMA(  VoxelData voxelData, ChunkSettings settings, ComputeShader compute)
     {
-        Initialize(chunk, voxelData, settings, compute);
+        Initialize(  voxelData, settings, compute);
     }
      
 
     public void Dispose() => ReleaseAll();
-
-    public void Build()
-    {
-        MarchCubes();
-    }
      
 
-    void Initialize(ChunkData chunk, VoxelData voxelData, ChunkSettings settings, ComputeShader compute)
+    void Initialize(  VoxelData voxelData, ChunkSettings settings, ComputeShader compute)
     { 
-        marchingCubesCompute = compute;
-        this.chunk = chunk;
+        marchingCubesCompute = compute; 
         this.settings = settings;
         this.voxelData = voxelData;
          
         _maxTriangles = settings.chunkSize * settings.chunkSize * settings.chunkSize * 5; 
         _threadGroupsX = Mathf.CeilToInt((settings.chunkSize + 1) * (settings.chunkSize + 1) * (settings.chunkSize + 1) / 128f);
 
-        AllocateBuffers();
-        AllocateMesh();
+        //AllocateBuffers();
+        //AllocateMesh();
     }
 
     void ReleaseAll()
@@ -84,10 +79,10 @@ public class MeshBuilderMA : System.IDisposable
         marchingCubesCompute.Dispatch(kernel, _threadGroupsX, 1, 1);
 
         //clear unused area of the buffers.
-        //marchingCubesCompute.SetBuffer(1, "vertices", _vertexBuffer);
-        //marchingCubesCompute.SetBuffer(1, "triangleIndices", _indexBuffer);
-        //marchingCubesCompute.SetBuffer(1, "triangleCounter", counterBuffer);
-        //marchingCubesCompute.Dispatch(1, 1, 1, 1);
+        marchingCubesCompute.SetBuffer(1, "vertices", _vertexBuffer);
+        marchingCubesCompute.SetBuffer(1, "triangleIndices", _indexBuffer);
+        marchingCubesCompute.SetBuffer(1, "triangleCounter", counterBuffer);
+        marchingCubesCompute.Dispatch(1, 1, 1, 1);
 
         // Bounding box
         var ext = new Vector3(settings.chunkSize, settings.chunkSize, settings.chunkSize);
@@ -140,8 +135,39 @@ public class MeshBuilderMA : System.IDisposable
     void ReleaseMesh()
     {
         _vertexBuffer.Dispose();
-        _indexBuffer.Dispose();
-        Object.Destroy(_mesh);
+        _indexBuffer.Dispose(); 
     }
 
+    public IEnumerator StartBuild()
+    {
+        isAsyncBuildDone = false;
+        AllocateBuffers();
+        AllocateMesh();
+        MarchCubes();
+
+        asyncMeshResult = _mesh;
+        ReleaseAll();
+        isAsyncBuildDone=true;
+
+        yield return null;
+
+
+    }
+
+    public IEnumerator StartBuildAndUpdate(ChunkData chunk)
+    {
+        yield return StartBuild();
+        ChunkMeshHelper.UpdateChunkMesh(chunk, asyncMeshResult);
+        yield break;
+    }
+
+    public Mesh Build()
+    {
+        AllocateBuffers();
+        AllocateMesh();
+        MarchCubes();
+        
+        ReleaseAll(); 
+        return _mesh;
+    }
 }

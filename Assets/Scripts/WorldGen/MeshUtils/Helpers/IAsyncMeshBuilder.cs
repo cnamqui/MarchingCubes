@@ -8,7 +8,7 @@ using UnityEngine;
 
 public interface IAsyncMeshBuilder
 {
-    public bool isAsyncBuildDone { get; set; } 
+    public bool isAsyncBuildDone { get; } 
     public Mesh asyncMeshResult { get; }
     public abstract IEnumerator StartBuild();
     public abstract IEnumerator StartBuildAndUpdate(ChunkData chunk);
